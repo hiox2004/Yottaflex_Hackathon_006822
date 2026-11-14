@@ -15,8 +15,8 @@ def main() -> int:
     parser.add_argument("--write", type=Path, help="write the markdown summary to this path")
     args = parser.parse_args()
     with db.connect() as con:
-        summary = summarize(con)
         violations = run_checks(con)
+        summary = summarize(con, violations)
     for check in summary["checks"]:
         status = "PASS" if check["violations"] == 0 else f"FAIL ({check['violations']})"
         sys.stdout.write(f"{check['name']:<28} {status}\n")

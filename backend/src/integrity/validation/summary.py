@@ -7,7 +7,7 @@ from typing import Any
 
 import psycopg
 
-from integrity.validation.checks import CHECKS, run_checks
+from integrity.validation.checks import CHECKS, Violation, run_checks
 
 TABLES = (
     "reviewer", "learner", "assessment", "integrity_rule", "submission", "similarity_report",
@@ -42,9 +42,11 @@ DISTRIBUTIONS = {
 }  # fmt: skip
 
 
-def summarize(con: psycopg.Connection[Any]) -> dict[str, Any]:
-    """Row counts, per-check pass/fail and distribution tables (all deterministic, sorted)."""
-    violations = run_checks(con)
+def summarize(
+    con: psycopg.Connection[Any], violations: list[Violation] | None = None
+) -> dict[str, Any]:
+    """Row counts, per-check pass/fail and distribution tables; pass `violations` to reuse a run."""
+    violations = run_checks(con) if violations is None else violations
     counts = {t: int(con.execute(f"SELECT count(*) FROM {t}").fetchone()[0]) for t in TABLES}  # type: ignore[index]
     checks = [
         {
