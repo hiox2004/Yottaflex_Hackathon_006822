@@ -45,7 +45,7 @@ Metrics on the Audit page: auditor precision/recall/F1 per issue type, triage-ve
 ## 4. Ownership and shared files
 | Path | Owner |
 |---|---|
-| `database/`, `backend/src/integrity/{dbload.py,validation/,auditor/}`, `backend/tests/integration/conftest.py`, their tests (`backend/tests/db/`), `docs/DATA_DICTIONARY.md`, `docs/status/database.md` | database tab |
+| `database/`, `backend/src/integrity/{dbload.py,validation/,auditor/}`, `backend/tests/integration/conftest.py`, their tests (`backend/tests/integration/`: schema, validation, auditor), `docs/DATA_DICTIONARY.md`, `docs/status/database.md` | database tab |
 | rest of `backend/` (ids, models, rules, queries, services, api, datagen, eval, cli, ai), `data/`, `docs/status/backend.md` | backend tab |
 | `frontend/`, `docs/status/frontend.md` | frontend tab |
 | `docs/` (everything else), `README.md`, `.github/`, `ruff.toml`, `docker-compose.yml`, root configs, `_template/design/` | orchestrator tab (this one) |

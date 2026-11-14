@@ -1,4 +1,4 @@
-# API contract v1.1 (frozen)
+# API contract v1.2 (frozen)
 
 Owned by the orchestrator tab. Backend implements it, frontend consumes it. Changes only through a status-file request
 ([05-scope-and-workflow.md](plans/05-scope-and-workflow.md) section 5). Scope cuts there apply: no versions, no cursors, no request ids.
@@ -10,6 +10,8 @@ Owned by the orchestrator tab. Backend implements it, frontend consumes it. Chan
 - Errors: HTTP status plus `{"error": {"code": "CONFLICT_OF_INTEREST", "message": "Plain-language text", "details": {}}}`.
 - Writes return the updated `CaseDetail` (200). Pagination: `limit` (default 50, max 200) and `offset`; lists return `{"items": [...], "total": n}`.
 - Every write runs in one transaction and also writes a `case_event`.
+- Assigning a support-staff or administrator account as a case reviewer is refused with 422 `VALIDATION_ERROR` (`details.reasons` contains `ROLE_CANNOT_REVIEW`);
+  such accounts appear in `eligible-reviewers` with `eligible: false` and that reason.
 
 ## Enums (snake_case strings)
 | Name | Values |
@@ -21,10 +23,10 @@ Owned by the orchestrator tab. Backend implements it, frontend consumes it. Chan
 | decision outcome | `no_violation`, `violation_confirmed`, `inconclusive` |
 | appeal outcome | `upheld`, `overturned`, `partially_upheld` |
 | event_type | `case_opened`, `reviewer_assigned`, `evidence_added`, `decision_recorded`, `case_reopened`, `appeal_filed`, `appeal_reviewer_assigned`, `appeal_decided`, `case_closed` |
-| dismissal_reason | `quote_only`, `template_match` |
+| dismissal_reason | `quote_only`, `template_match` (the larger exclusion; a tie counts as `quote_only`) |
 | issue_type | `AUTO_GUILT_WITHOUT_REVIEW`, `REVIEWER_CONFLICT`, `EVIDENCE_AFTER_DECISION_NO_HISTORY`, `APPEAL_CLOSED_NO_INDEPENDENT_REVIEW` |
 | allowed action | `assign_reviewer`, `add_evidence`, `reopen`, `decide`, `file_appeal`, `assign_appeal_reviewer`, `decide_appeal`, `close` |
-| conflict reason code | `INSTRUCTOR_OF_ASSESSMENT`, `SAME_DEPARTMENT`, `REVIEWED_LEARNER_BEFORE`, `ALREADY_ON_CASE`, `DECIDED_THIS_CASE` |
+| conflict reason code | `INSTRUCTOR_OF_ASSESSMENT`, `SAME_DEPARTMENT`, `REVIEWED_LEARNER_BEFORE`, `ALREADY_ON_CASE`, `DECIDED_THIS_CASE`, `ROLE_CANNOT_REVIEW` |
 | error codes | `UNKNOWN_ACTOR`(401), `ROLE_NOT_ALLOWED`(403), `NOT_FOUND`(404), `CONFLICT_OF_INTEREST`, `NOT_INDEPENDENT`, `REOPEN_REQUIRED`, `INVALID_TRANSITION`, `NOT_ASSIGNED`, `EVIDENCE_REQUIRED`, `APPEAL_EXISTS`, `NOT_ADVERSE`, `NOT_APPEAL_REVIEWER`, `APPEAL_UNRESOLVED`, `APPEAL_WINDOW_OPEN` (all 409), `VALIDATION_ERROR`(422) |
 
 ## Endpoints
@@ -33,7 +35,7 @@ Owned by the orchestrator tab. Backend implements it, frontend consumes it. Chan
 | GET `/health` | liveness, no actor needed | any | | `{"status":"ok","database":"up"}` |
 | GET `/reviewers` | actor picker | any | | `Reviewer[]` |
 | GET `/rules` | rule versions | any | | `Rule[]` |
-| GET `/queue?status=&band=&assigned_to=&limit=&offset=` | cases, newest first | any | | `{items: QueueRow[], total}` |
+| GET `/queue?status=&band=&assigned_to=&needs_my_action=&limit=&offset=` | cases, newest first | any | | `{items: QueueRow[], total, counts: QueueCounts}` |
 | GET `/flags?outcome=dismissed&limit=&offset=` | auto-dismissed flags (read-only) | any | | `{items: DismissedFlag[], total}` |
 | GET `/cases/{id}` | full case | any | | `CaseDetail` |
 | GET `/cases/{id}/timeline` | append-only history | any | | `TimelineEvent[]` (oldest first) |
@@ -57,6 +59,11 @@ type Rule = { rule_id: string; version: number; log_threshold: number; review_th
 type QueueRow = { case_id: string; learner_id: string; learner_name: string; assessment_title: string; adjusted_score: number;
                   band: Band; status: Status; assignee_ids: string[]; opened_at: string;
                   needs_my_action: boolean };      // true when the requesting actor has at least one allowed action on the case
+type QueueCounts = { needs_me: number;          // cases where the requesting actor has an allowed action
+                     under_review: number;      // status open or under_review
+                     awaiting_appeal: number;   // status appealed or appeal_review
+                     decided: number;           // status decided or appeal_decided
+                     closed: number; dismissed_flags: number };   // counted over ALL cases, ignoring the filters
 type DismissedFlag = { similarity_report_id: string; submission_id: string; learner_id: string; raw_score: number;
                        quoted_score: number; template_score: number; adjusted_score: number; dismissal_reason: DismissalReason };
 type CaseDetail = {
