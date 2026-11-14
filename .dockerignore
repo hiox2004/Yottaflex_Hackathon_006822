@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+.cache
+.claude
+.vscode
+_template
+node_modules
+frontend/node_modules
+frontend/dist
+backend/.pytest_cache
+backend/.mypy_cache
+**/__pycache__
+prompts/prompts.md

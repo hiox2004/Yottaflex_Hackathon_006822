@@ -1,7 +1,8 @@
-# Database tier. Local dev only; credentials are throwaway.
-#   docker compose up -d db     start
-#   docker compose down         stop (data kept in the named volume)
-#   docker compose down -v      stop and wipe data
+# Full three-tier application stack & database.
+#   docker compose up --build -d    start all 3 tiers (DB, backend, frontend)
+#   docker compose up -d db          start only the DB (for local host development)
+#   docker compose down              stop containers (data kept in named volume)
+#   docker compose down -v           stop containers and wipe database
 services:
   db:
     image: postgres:16
@@ -11,7 +12,7 @@ services:
       POSTGRES_PASSWORD: integrity_dev
       POSTGRES_DB: integrity
     ports:
-      - "5433:5432"   # 5433 on the host so it never clashes with another local Postgres
+      - "5433:5432"   # 5433 on the host so it never clashes with local Postgres
     volumes:
       - integrity_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -19,6 +20,29 @@ services:
       interval: 3s
       timeout: 3s
       retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: integrity-backend
+    environment:
+      - DATABASE_URL=postgresql://integrity:integrity_dev@db:5432/integrity
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: integrity-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
 
 volumes:
   integrity_pgdata:

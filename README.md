@@ -28,13 +28,29 @@ React (Vite)  ──HTTP/JSON──▶  FastAPI Service  ──SQL──▶  Pos
 * Python 3.12 (venv at `.venv`)
 * Node.js 22
 
-### 1. Launch PostgreSQL Container
+## ⚡ Quick Start (Single-Command Docker — Recommended)
+
+Requires only **Docker Desktop**:
+```powershell
+docker compose up --build -d
+```
+* **Frontend UI**: Open **`http://localhost:5173`**
+* **Backend API**: `http://localhost:8000/api/health`
+* **PostgreSQL Database**: `localhost:5433` (automatically migrated and seeded with full dataset: 10,000 submissions, 1,000 flags, 300 cases)
+
+To stop: `docker compose down` (or `docker compose down -v` to wipe data).
+
+---
+
+### Alternative: Local Development Setup (Manual)
+
+#### 1. Launch PostgreSQL Container
 ```powershell
 docker compose up -d db
 ```
 *PostgreSQL 16 runs on `localhost:5433` (databases: `integrity`, `integrity_api`, `integrity_dbtab`).*
 
-### 2. Backend Setup & Demo Database Initialization
+#### 2. Backend Setup & Demo Database Initialization
 ```powershell
 # Set up Python environment
 .\.venv\Scripts\python -m pip install -r backend/requirements.lock
@@ -50,7 +66,7 @@ cd backend
 ```
 API health: `http://localhost:8000/api/health`
 
-### 3. Frontend Setup
+#### 3. Frontend Setup
 ```powershell
 # In a separate terminal
 cd frontend
