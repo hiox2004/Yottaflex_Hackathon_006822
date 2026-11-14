@@ -13,6 +13,8 @@ summary and a reproducibility proof, and a reviewer should be able to inspect re
   validation summary.
 - Not committed: full-scale bulk files and ground truth for the full scale; they are regenerated bit-for-bit from the seed.
 - Case IDs use `CAS-` (decision 0005 accepted).
+- Container start runs `python -m integrity.cli bootstrap --scale full`: it generates `data/full/` only when `seed.sql`
+  or `manifest.json` is missing, and loads only into an empty database (existing data is never wiped on restart).
 
 ## Why
 Keeps the repo small and avoids binary or bulky files, while the checksums in the manifest let anyone prove a regenerated

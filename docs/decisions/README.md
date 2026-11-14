@@ -16,6 +16,7 @@ Numbered, never deleted. If a decision changes, add a new record that supersedes
 | [0009](0009-generated-data-and-loading.md) | Generated data policy and database loading | Accepted (amended by 0010) |
 | [0010](0010-adopt-reviewed-plans-with-scope-cuts.md) | Adopt the reviewed plans, with scope cuts | Accepted |
 | [0011](0011-parallel-tabs-and-delegation.md) | Parallel tabs and delegation policy | Accepted |
+| [0012](0012-no-llm-in-the-decision-path.md) | No LLM in the decision path; AI is development tooling and a stateless test-case checker | Accepted |
 
 ## Template
 

@@ -1,6 +1,6 @@
 # Backend tab status
 
-Updated: M2 done (14 Nov 2026) · Next: M3 18:10, M4 18:45 freeze
+Updated: M2 done (14 Nov 2026). M3 and M4 code is in the working tree but not committed under this tab's status (check `git status`). Freeze 18:45
 
 ## Done
 - M1: ids, models, pure rules (`explain_triage`, `action_checks`, guards), unit tests. Orchestrator decisions 2 and 3 applied (tie = `quote_only`; `ROLE_CANNOT_REVIEW` gives 422 `VALIDATION_ERROR`).
@@ -9,7 +9,7 @@ Updated: M2 done (14 Nov 2026) · Next: M3 18:10, M4 18:45 freeze
 - Schema facts accepted: `assessment.kind` values and the `effective_outcome` mapping.
 
 ## Next
-- M3: write endpoints and guards, G1-G4 API tests, full-scale eval, `simplify`, `security-review`, proposed `/audit/*` shapes.
+- M3 written: write endpoints and guards, G1-G4 API tests (`tests/api/test_write_endpoints.py`), `/audit/*` routes, eval package. Still to check: full pytest, ruff, mypy, `simplify`, `security-review`.
 
 ## Blocked / needs from another tab
 - none
@@ -17,5 +17,5 @@ Updated: M2 done (14 Nov 2026) · Next: M3 18:10, M4 18:45 freeze
 ## Contract change requests
 - none. Note: `GET /reviewers` works without `X-Actor-Id` (the UI needs it to pick an actor); every other endpoint except `/health` requires it.
 
-## Proposed shapes (by M3): `/audit/metrics`, `/audit/validation`
-- not yet
+## Audit shapes: `/audit/metrics`, `/audit/validation`
+- Final shapes are in the contract (v1.3). Implementation is in the working tree; not re-verified in this pass.

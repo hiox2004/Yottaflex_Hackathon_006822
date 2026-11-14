@@ -1,12 +1,23 @@
-# Full three-tier application stack & database.
-#   docker compose up --build -d    start all 3 tiers (DB, backend, frontend)
-#   docker compose up -d db          start only the DB (for local host development)
-#   docker compose down              stop containers (data kept in named volume)
-#   docker compose down -v           stop containers and wipe database
+# Full three-tier application stack (DB, backend, frontend) for one-command runs.
+#   docker compose up --build -d    start all 3 tiers (first run builds both images)
+#   docker compose ps               shows health (db, backend, frontend should all be "healthy")
+#   docker compose down             stop containers (data kept in named volume)
+#   docker compose down -v          stop containers and wipe database
+#
+# Build notes: Compose v5 runs builds through Bake. Bake rejected the earlier
+# `dockerfile: backend/Dockerfile` form on Windows ("additional privileges requested:
+# --allow=fs.read=backend\Dockerfile"), so the backend uses `./backend/Dockerfile`.
+# Fallback if a Bake error ever returns: `COMPOSE_BAKE=false docker compose up --build -d`
+# (classic builder, same result).
+#
+# Start order: frontend waits for backend health, backend waits for db health. The backend
+# CMD runs `integrity.cli bootstrap` (waits on the DB through depends_on, generates data only
+# if missing, loads the DB only when empty), then uvicorn. restart: unless-stopped covers races.
 services:
   db:
     image: postgres:16
     container_name: integrity-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: integrity
       POSTGRES_PASSWORD: integrity_dev
@@ -16,7 +27,8 @@ services:
     volumes:
       - integrity_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U integrity -d integrity"]
+      # -h 127.0.0.1 forces TCP: the init-phase temp server (socket only) never reports healthy.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U integrity -d integrity"]
       interval: 3s
       timeout: 3s
       retries: 20
@@ -24,8 +36,9 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: ./backend/Dockerfile
     container_name: integrity-backend
+    restart: unless-stopped
     environment:
       - DATABASE_URL=postgresql://integrity:integrity_dev@db:5432/integrity
     ports:
@@ -33,16 +46,30 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 120s   # bootstrap (generate if missing + DB load) runs before uvicorn
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: integrity-frontend
+    restart: unless-stopped
     ports:
       - "5173:5173"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy   # nginx resolves backend:8000 at startup
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5173/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
 
 volumes:
   integrity_pgdata:

@@ -1,321 +1,293 @@
 # Prompt log
 
-Exported 2026-11-14 17:23 from 5 session(s).
+Generated 2026-11-14 by `prompts/export_prompts.py` from local transcripts (no model calls). Assistant replies are not included.
 
+Sources and filters: Claude Code transcripts of the TemplateSetup preparation tabs and of the CandidateWorkspace project (sub-agent sidechains, tool results, system reminders, IDE context, task notifications and sub-agent hand-backs excluded; long pasted blocks cut to 40 lines). The YottaFlex-ASG project folder is excluded (separate earlier assignment). E-mail addresses, keys and the Windows user name are redacted.
 
-## Session 4e8e9d80
+## Summary
 
-### 1. 2026-11-14 09:42:50 UTC
+| Section | Tabs/sessions | Prompts | Date range (UTC) |
+|---|---|---|---|
+| 1. Preparation tabs (TemplateSetup) | 2 | 8 | 2026-11-12 15:27:23 UTC to 2026-11-14 07:50:59 UTC |
+| 2. Main log (CandidateWorkspace) | 6 | 81 | 2026-11-14 08:28:30 UTC to 2026-11-14 14:17:24 UTC |
+| 3. Antigravity (Gemini) history | 1 | 6 | 2026-11-14 11:29:23 UTC to 2026-11-14 12:22:26 UTC |
 
-the actual hld, best practises for us, without overdoing it. then /plan backend, /plan frontend, /plan db design. document these plans in a folder , once we have all three plans, run a opus agent to review, fix and improve the plans critically, asking what we were missing, u can make use of our templates research and knowledge base for this.
+Total prompts: **95**. Transcripts scanned: 8 (Claude Code).
 
+## 1. Preparation tabs (TemplateSetup: built the _template library and scaffolding for this workspace)
 
-## Session 1b27bd45
+Folder c--users-<user>-desktop-templatesetup, all top-level sessions.
 
-### 2. 2026-11-14 10:26:56 UTC
+- Tabs/sessions: **2**; prompts: **8**
+- Date range: 2026-11-12 15:27:23 UTC to 2026-11-14 07:50:59 UTC
 
-Read _template/tab-prompts/database.md and follow it exactly. Start with its reading list, then D1. Use your own database: set $env:DATABASE_URL="postgresql://integrity:integrity_dev@localhost:5433/integrity_dbtab" in your shell before running anything against Postgres.
+| # | Session | Folder | First prompt | Last prompt | Prompts |
+|---|---|---|---|---|---|
+| 1 | `c1c74623` | c--Users-<user>-Desktop-TemplateSetup | 2026-11-12 15:27:23 UTC | 2026-11-13 06:32:42 UTC | 6 |
+| 2 | `41f65872` | c--Users-<user>-Desktop-TemplateSetup | 2026-11-14 07:48:31 UTC | 2026-11-14 07:50:59 UTC | 2 |
 
-### 3. 2026-11-14 10:51:13 UTC
+### 1. 2026-11-12 15:27:23 UTC · tab `c1c74623`
 
-Read docs/status/orchestrator.md (new decisions; contract is now v1.2). First, export run_checks and audit from the validation and auditor package __init__ files (a stub that raises NotImplementedError is fine) and push, so the backend's mypy and CI go green. Then continue D2, D3 and D4 without stopping between milestones; stop only if blocked, if you need a decision, or when D4 is done.
+okay so i got shortlisted for the in campus hackathon for yottaflex, i want u to understand what kinda problem statements are usually given (the 72 hour round is done, now the hackathon in their office). i basically wanna do a bit of research and also set up so i can save time once im there
 
-### 4. 2026-11-14 10:59:19 UTC
+### 2. 2026-11-12 15:28:44 UTC · tab `c1c74623`
 
-Review target: `Scope: only my database-tab files: database/schema.sql, backend/src/integrity/{dbload.py,validation/,auditor/}, backend/tests/integration/{conftest,test_schema,test_validation,test_auditor}.py. Do not touch other paths. Keep behaviour; tests in backend/tests/integration must still pass (DATABASE_URL set to integrity_dbtab).`
+websearch properly. gemini was able to find
 
-`/simplify → 4 cleanup agents in parallel → apply the fixes`
+### 3. 2026-11-12 15:42:07 UTC · tab `c1c74623`
 
-You are improving the quality of the changed code, not hunting for bugs. Review
-it for reuse, simplification, efficiency, and altitude issues, then fix what you
-find. Do not look for correctness bugs — that is what `/code-review` is for.
+okay so i want u to run agents and set up everything, also i want to make an agent for research, it should bring up swarms of cheap haiku agents and go into actual depth for the research, not the surface level basic stuff. and not wasteful stuff, precise what is relevant stuff only so that token usage is conserved, u can make a tool to help u with cutting down token costs.
 
-## Phase 0 — Gather the diff
+I also want a library with ai concepts and tricks and improvements, actually deep level stuff that can be my guide to solving the problem simpler, basically the library will be concepts and processes and major problems and their solutions and stuff. this will be made by u orchestrating multiple swarms and getting them to compile into the library and everything should be indexed, made for easy access and cutting down token usage for searching them in the library. set it up perfectly so its very convineient for us on the day of the actual hackathon, u have full control. prompt graph loop and build a system like that. keep going and improving until youre satisfied
 
-Run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` / `git diff HEAD~1`
-if there's no upstream) to get the unified diff under review. If there are
-uncommitted changes, or the range diff is empty, also run `git diff HEAD` and
-include the working-tree changes in scope — the review often runs before the
-commit. If a PR number, branch name, or file path was passed as an argument,
-review that target instead. Treat this diff as the review scope.
+### 4. 2026-11-12 16:47:52 UTC · tab `c1c74623`
 
-## Phase 1 — Review (4 cleanup agents in parallel)
+yes, and also we have accurate real data right? no mis information and stuff?
 
-Launch **4 independent review agents** via the Agent tool, all in a
-single message so they run concurrently. Pass each agent the diff and one of
-the four angles below. Each returns its findings with `file`, `line`, a
-one-line `summary`, and the concrete cost (what is duplicated, wasted, or
-harder to maintain).
 
-### Reuse
 
-Flag new code that re-implements something the codebase
-already has — Grep shared/utility modules and files adjacent to the change,
-and name the existing helper to call instead.
+Please stop it yourself. It would collide with the starter's default port, 8000: u can stop it
 
-### Simplification
+### 5. 2026-11-12 20:26:29 UTC · tab `c1c74623`
 
-Flag unnecessary complexity the diff adds: redundant or derivable state,
-copy-paste with slight variation, deep nesting, dead code left behind. Name
-the simpler form that does the same job.
+continue
 
-### Efficiency
+### 6. 2026-11-13 06:32:42 UTC · tab `c1c74623`
 
-Flag wasted work the diff introduces: redundant computation or repeated I/O,
-independent operations run sequentially, blocking work added to startup or
-hot paths. Also flag long-lived objects built from closures or captured
-environments — they keep the entire enclosing scope alive for the object's
-lifetime (a memory leak when that scope holds large values); prefer a
-class/struct that copies only the fields it needs. Name the cheaper
-alternative.
+do we have a db set up ?
 
-### Altitude
+### 7. 2026-11-14 07:48:31 UTC · tab `41f65872`
 
-Check that each change fixes the root cause at the right depth rather than
-patching a symptom with a fragile bandaid. Special cases layered on shared
-infrastructure are a sign the fix isn't deep enough — prefer the simpler, more
-general change to the underlying mechanism over adding special cases, and name
-that change.
+````text
+Business Context / Problem
+Manage similarity flags, evidence, reviewer assignment, case timelines and appeal outcomes with due process.
 
-## Phase 2 — Apply the fixes
+Objective and Scope
+Build a working solution for this end-to-end workflow: Manage similarity flags, evidence, reviewer assignment, case timelines and appeal outcomes with due process. The solution should expose key decisions and exceptions, preserve traceability, and produce measurable outputs. Medium complexity means multiple related entities, conditional rules, at least one exception path and meaningful evaluation metrics.
 
-Wait for all four agents to complete, dedup findings that point at the same
-line or mechanism, and fix each remaining one directly. Skip any finding whose
-fix would change intended behavior, require changes well outside the reviewed
-diff, or that you judge to be a false positive — note the skip rather than
-arguing with it. Finish with a brief summary of what was fixed and what was
-skipped (or confirm the code was already clean).
+Primary Actors / Systems
+Learner, instructor, academic administrator, support staff and platform administrator
 
+Business Workflow and Rules
+1. Generate/reference master data first: Learner, Assessment, Submission, SimilarityReport, IntegrityRule.
+2. Generate dependent transaction/event records using valid parent IDs.
+3. Apply business logic: Create assessment submissions; generate synthetic similarity reports and evidence references; define thresholds that trigger review rather than automatic guilt; assign reviewers; capture decisions and rationale; support appeals and case closure.
+4. Persist state changes as explicit records/events where relevant; do not overwrite history.
+5. Generate outcomes and ground-truth labels from documented rules, not independent random assignment.
 
-## Session ca6ff057
+Entities and Relationships
+Core entities: Learner, Assessment, Submission, SimilarityReport, IntegrityRule, Case, EvidenceItem, Reviewer, Decision, Appeal. Define a primary key for every entity and foreign keys for every relationship. Document cardinality (1:1, 1:N, N:M), optional relationships, effective dates and lifecycle states. Use bridge tables for many-to-many relationships; retain event history for state changes; validate all joins. For deliberate anomaly cases, keep an issue_type/ground_truth label rather than silently corrupting unrelated rows.
 
-### 5. 2026-11-14 10:27:51 UTC
+ID / Nomenclature Conventions
+SUB-2026-000001; SIM-<submission-id>-01; INT-2026-000001; EVD-<case-id>-001; APL-<case-id>-01.
 
-Read _template/tab-prompts/frontend.md and follow it exactly. Start with its reading list, then M1. Open _template/design/case-mock.html in a browser for the visual reference. (i dont like the visual reference design particularly tho, so feel free to use ur skills and ideas to make it a different level.
+Synthetic Data Generation Instructions (Granular)
+Step 1 — Write a data dictionary for: Learner, Assessment, Submission, SimilarityReport, IntegrityRule, Case, EvidenceItem, Reviewer, Decision, Appeal. For each field specify type, required/optional, allowed values, units, uniqueness and validation rule.
+Step 2 — Create parent/master tables first, then child and event tables. Apply this domain-specific generation logic: Create assessment submissions; generate synthetic similarity reports and evidence references; define thresholds that trigger review rather than automatic guilt; assign reviewers; capture decisions and rationale; support appeals and case closure.
+Step 3 — Apply deterministic IDs and naming: SUB-2026-000001; SIM-<submission-id>-01; INT-2026-000001; EVD-<case-id>-001; APL-<case-id>-01. Keep counters zero-padded, IDs immutable, and referenced IDs exactly consistent across files.
+Step 4 — Generate the baseline volume: Generate 10,000 submissions, 1,000 flags and 300 cases. Include legitimate quoted material, shared templates, false positives, multiple reviewers and successful appeals. Use a fixed seed (e.g. 20261022) and parameterize scale so starter and full datasets use the same generator.
+Step 5 — Generate valid baseline records first, then inject labelled edge cases: Flag automatically treated as guilt; reviewer has conflict; evidence added after decision without history; appeal closed without independent review.
+Step 6 — Calculate derived values (totals, balances, scores, statuses and dates) from source records rather than generating them independently.
+Step 7 — Produce a separate ground_truth.csv/json for known anomalies, expected decisions or labels; never leak it into input features.
+Step 8 — Run validation: primary-key uniqueness, foreign-key integrity, allowed enums, date ordering, arithmetic reconciliation, lifecycle transitions and duplicate checks.
+Step 9 — Export CSV/JSON/SQL seed data plus README, schema/data dictionary, generator command, fixed seed, source manifest and validation summary.
+Step 10 — Regenerate twice with the same seed and compare row counts/checksums to demonstrate reproducibility.
 
-### 6. 2026-11-14 10:51:30 UTC
+Suggested Volume and Coverage
+Generate 10,000 submissions, 1,000 flags and 300 cases. Include legitimate quoted material, shared templates, false positives, multiple reviewers and successful appeals.
 
-Read docs/status/orchestrator.md (new decisions; contract is now v1.2). Use the new GET /queue counts object for the filter tiles and drop the 200-row workaround, and add the needs_my_action filter to the client and fixtures. At M2 do one visual check of Queue and Case in light and dark with whatever browser or screenshot tool you have, and fix obvious problems once. Continue M2, M3 and M4 without stopping between milestones; stop only if blocked, if you need a decision, or when M4 is done.
+Required Edge Cases / Negative Scenarios
+Flag automatically treated as guilt; reviewer has conflict; evidence added after decision without history; appeal closed without independent review.
 
-### 7. 2026-11-14 10:58:43 UTC
+[... 8 more lines]
+````
 
-`/simplify → 4 cleanup agents in parallel → apply the fixes`
 
-You are improving the quality of the changed code, not hunting for bugs. Review
-it for reuse, simplification, efficiency, and altitude issues, then fix what you
-find. Do not look for correctness bugs — that is what `/code-review` is for.
+this is problem statement, store it properly and make sure we fulfil all the requirements, and in this chat i want u to discuss and drill me about the problem after u explain it to me
 
-## Phase 0 — Gather the diff
+### 8. 2026-11-14 07:50:59 UTC · tab `41f65872`
 
-Run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` / `git diff HEAD~1`
-if there's no upstream) to get the unified diff under review. If there are
-uncommitted changes, or the range diff is empty, also run `git diff HEAD` and
-include the working-tree changes in scope — the review often runs before the
-commit. If a PR number, branch name, or file path was passed as an argument,
-review that target instead. Treat this diff as the review scope.
+no wait first eli5 what exactly is asked, and what are the constraints and things we need to take care of, i want to understand the project
 
-## Phase 1 — Review (4 cleanup agents in parallel)
 
-Launch **4 independent review agents** via the Agent tool, all in a
-single message so they run concurrently. Pass each agent the diff and one of
-the four angles below. Each returns its findings with `file`, `line`, a
-one-line `summary`, and the concrete cost (what is duplicated, wasted, or
-harder to maintain).
+## 2. Main log (CandidateWorkspace)
 
-### Reuse
+Folder c--CandidateWorkspace (every session) plus any project whose cwd is inside CandidateWorkspace.
 
-Flag new code that re-implements something the codebase
-already has — Grep shared/utility modules and files adjacent to the change,
-and name the existing helper to call instead.
+- Tabs/sessions: **6**; prompts: **81**
+- Date range: 2026-11-14 08:28:30 UTC to 2026-11-14 14:17:24 UTC
 
-### Simplification
+| # | Session | Folder | First prompt | Last prompt | Prompts |
+|---|---|---|---|---|---|
+| 1 | `0569cc96` | c--CandidateWorkspace | 2026-11-14 08:28:30 UTC | 2026-11-14 11:22:13 UTC | 35 |
+| 2 | `4e8e9d80` | c--CandidateWorkspace | 2026-11-14 09:42:50 UTC | 2026-11-14 09:42:50 UTC | 1 |
+| 3 | `1b27bd45` | c--CandidateWorkspace | 2026-11-14 10:26:56 UTC | 2026-11-14 10:59:19 UTC | 3 |
+| 4 | `e9c7f04e` | c--CandidateWorkspace | 2026-11-14 10:27:07 UTC | 2026-11-14 11:17:04 UTC | 3 |
+| 5 | `ca6ff057` | c--CandidateWorkspace | 2026-11-14 10:27:51 UTC | 2026-11-14 10:58:43 UTC | 3 |
+| 6 | `d673594e` | c--CandidateWorkspace | 2026-11-14 12:43:59 UTC | 2026-11-14 14:17:24 UTC | 36 |
 
-Flag unnecessary complexity the diff adds: redundant or derivable state,
-copy-paste with slight variation, deep nesting, dead code left behind. Name
-the simpler form that does the same job.
-
-### Efficiency
-
-Flag wasted work the diff introduces: redundant computation or repeated I/O,
-independent operations run sequentially, blocking work added to startup or
-hot paths. Also flag long-lived objects built from closures or captured
-environments — they keep the entire enclosing scope alive for the object's
-lifetime (a memory leak when that scope holds large values); prefer a
-class/struct that copies only the fields it needs. Name the cheaper
-alternative.
-
-### Altitude
-
-Check that each change fixes the root cause at the right depth rather than
-patching a symptom with a fragile bandaid. Special cases layered on shared
-infrastructure are a sign the fix isn't deep enough — prefer the simpler, more
-general change to the underlying mechanism over adding special cases, and name
-that change.
-
-## Phase 2 — Apply the fixes
-
-Wait for all four agents to complete, dedup findings that point at the same
-line or mechanism, and fix each remaining one directly. Skip any finding whose
-fix would change intended behavior, require changes well outside the reviewed
-diff, or that you judge to be a false positive — note the skip rather than
-arguing with it. Finish with a brief summary of what was fixed and what was
-skipped (or confirm the code was already clean).
-
-
-## Session e9c7f04e
-
-### 8. 2026-11-14 10:27:07 UTC
-
-Read _template/tab-prompts/backend.md and follow it exactly. Start with its reading list, then M1. Use your own database: set $env:DATABASE_URL="postgresql://integrity:integrity_dev@localhost:5433/integrity_api" in your shell before running anything against Postgres.
-
-### 9. 2026-11-14 10:51:22 UTC
-
-Read docs/status/orchestrator.md (new decisions; contract is now v1.2). Apply decisions 2 and 3: a dismissal tie is quote_only (add a unit test), and assigning support staff or administrators returns 422 VALIDATION_ERROR with ROLE_CANNOT_REVIEW. Contract v1.2 also adds a needs_my_action filter and a counts object on GET /queue. schema.sql is committed (e2095de); read docs/status/database.md for the schema facts. Continue M2, M3 and M4 without stopping between milestones; stop only if blocked, if you need a decision, or when M4 is done.
-
-### 10. 2026-11-14 11:17:04 UTC
-
-Review target: `Scope: only my backend paths changed since commit 2b6804d (backend/src/integrity/{services,api,queries,eval,schemas.py,cli.py,db.py}, backend/tests/api). Do not touch dbload.py, validation/, auditor/, tests/integration/conftest.py, or anything outside backend/. Keep behaviour identical; run no tests except ruff on those paths.`
-
-`/simplify → 4 cleanup agents in parallel → apply the fixes`
-
-You are improving the quality of the changed code, not hunting for bugs. Review
-it for reuse, simplification, efficiency, and altitude issues, then fix what you
-find. Do not look for correctness bugs — that is what `/code-review` is for.
-
-## Phase 0 — Gather the diff
-
-Run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` / `git diff HEAD~1`
-if there's no upstream) to get the unified diff under review. If there are
-uncommitted changes, or the range diff is empty, also run `git diff HEAD` and
-include the working-tree changes in scope — the review often runs before the
-commit. If a PR number, branch name, or file path was passed as an argument,
-review that target instead. Treat this diff as the review scope.
-
-## Phase 1 — Review (4 cleanup agents in parallel)
-
-Launch **4 independent review agents** via the Agent tool, all in a
-single message so they run concurrently. Pass each agent the diff and one of
-the four angles below. Each returns its findings with `file`, `line`, a
-one-line `summary`, and the concrete cost (what is duplicated, wasted, or
-harder to maintain).
-
-### Reuse
-
-Flag new code that re-implements something the codebase
-already has — Grep shared/utility modules and files adjacent to the change,
-and name the existing helper to call instead.
-
-### Simplification
-
-Flag unnecessary complexity the diff adds: redundant or derivable state,
-copy-paste with slight variation, deep nesting, dead code left behind. Name
-the simpler form that does the same job.
-
-### Efficiency
-
-Flag wasted work the diff introduces: redundant computation or repeated I/O,
-independent operations run sequentially, blocking work added to startup or
-hot paths. Also flag long-lived objects built from closures or captured
-environments — they keep the entire enclosing scope alive for the object's
-lifetime (a memory leak when that scope holds large values); prefer a
-class/struct that copies only the fields it needs. Name the cheaper
-alternative.
-
-### Altitude
-
-Check that each change fixes the root cause at the right depth rather than
-patching a symptom with a fragile bandaid. Special cases layered on shared
-infrastructure are a sign the fix isn't deep enough — prefer the simpler, more
-general change to the underlying mechanism over adding special cases, and name
-that change.
-
-## Phase 2 — Apply the fixes
-
-Wait for all four agents to complete, dedup findings that point at the same
-line or mechanism, and fix each remaining one directly. Skip any finding whose
-fix would change intended behavior, require changes well outside the reviewed
-diff, or that you judge to be a false positive — note the skip rather than
-arguing with it. Finish with a brief summary of what was fixed and what was
-skipped (or confirm the code was already clean).
-
-
-## Session 0569cc96
-
-### 11. 2026-11-14 08:28:30 UTC
+### 9. 2026-11-14 08:28:30 UTC · tab `0569cc96`
 
 i want u bring over the template setup folder we made. also set up so we have a folder for prompts being documented, maybe we can export in the end so we dont spend tokens pointlessly on it if possible.
 
-### 12. 2026-11-14 08:46:05 UTC
+### 10. 2026-11-14 08:46:05 UTC · tab `0569cc96`
 
-[Problem statement text omitted for privacy]
+````text
+Save these two files in your project root before launching **Claude Code**—keeping `CLAUDE.md` concise and rule-driven while storing the full domain specification in `SPEC.md` prevents context bloat and keeps Claude Code locked onto your architectural guardrails.
+
+---
+
+### File 1: `CLAUDE.md` (Drop into Project Root)
+
+```markdown
+# Project: Academic Integrity, Similarity Flags & Due Process Workflow
+
+## Mission & Architecture
+Build an end-to-end academic integrity workflow managing similarity flags, evidence chains, conflict-free reviewer assignment, append-only case timelines, and appeal outcomes with due process[cite: 1].
+- **Full Specification:** Always read `@SPEC.md` before designing schemas, generators, or workflows.
+- **Architectural Boundary (Strict):**
+  1. **Deterministic Core (Python + SQLite):** 100% of synthetic data generation, ID assignment, threshold evaluation, reviewer conflict checks, append-only state transitions, anomaly injection, and compliance validation MUST be deterministic Python/SQL.
+  2. **Read-Only Edge AI Copilot (`llama3.2:3b` via Ollama):** Optional, single-record, on-demand assistant in the UI (`http://localhost:11434/v1`, `temperature=0`, `num_ctx=2048`, flat Pydantic JSON schemas). AI NEVER generates synthetic rows, mutates database state, assigns reviewers, or decides guilt[cite: 1]. Include an instant deterministic fallback if Ollama is offline.
+
+## Tech Stack & Hardware Constraints
+- **Target Hardware:** Laptop with 4GB GPU VRAM (reserved strictly for Ollama `llama3.2:3b`) + CPU/RAM for app stack.
+- **Backend & Data Engine:** Python 3.11+, FastAPI, SQLite (`integrity.db`), Pydantic v2.
+- **Frontend:** Lightweight React / Vite (or clean server-rendered UI) running on CPU.
+- **Local LLM:** OpenAI-compatible SDK pointing to `LLM_BASE_URL` (`http://localhost:11434/v1`) and `LLM_MODEL` (`llama3.2:3b`).
+
+## Non-Negotiable Domain Invariants
+1. **Review, Never Auto-Guilt:** Crossing a similarity threshold triggers human review—never automatic guilt[cite: 1].
+2. **Append-Only Event History:** Never overwrite historical state changes; persist every transition as an explicit event record and derive entity statuses/dates from events[cite: 1].
+3. **Deterministic Nomenclature:** Keep counters zero-padded and IDs immutable across all exports[cite: 1]:
+   - Submission: `SUB-2026-000001`[cite: 1]
+   - SimilarityReport: `SIM-<submission-id>-01`[cite: 1]
+   - Case: `INT-2026-000001`[cite: 1] (disambiguate `IntegrityRule` as `RUL-2026-000001` or document explicitly in `SPEC.md`)
+   - EvidenceItem: `EVD-<case-id>-001`[cite: 1]
+   - Appeal: `APL-<case-id>-01`[cite: 1]
+4. **Zero Ground-Truth Leakage:** Keep `ground_truth.csv` and `ground_truth.json` strictly isolated from operational tables and AI/auditor input features[cite: 1].
+5. **Reproducibility:** Fixed seed `20261022` with parameterized scale (`--scale starter` vs `--scale full` for 10,000 submissions / 1,000 flags / 300 cases)[cite: 1].
+
+## Build Phases (Execute Sequentially & Verify Each Phase)
+- **Phase 1:** Write Data Dictionary (`docs/DATA_DICTIONARY.md`) and SQLite DDL (`schema.sql`) covering all 10 core entities + N:M bridge tables + append-only event log[cite: 1].
+- **Phase 2:** Build deterministic generator (`src/generate.py`) + validator (`src/validate.py`) + dual-run checksum verification (`src/verify_reproducibility.py`) exporting CSV, JSON, SQL, manifest, and validation summary[cite: 1].
+- **Phase 3:** Build deterministic Due-Process Auditor (`src/auditor.py`) to detect the 4 injected negative scenarios without reading `ground_truth`, outputting Precision/Recall/F1 metrics[cite: 1].
+- **Phase 4:** Build FastAPI endpoints + React/Vite dashboard + single-record `llama3.2:3b` Triage & Rationale Copilot with deterministic fallback.
+
+[... 56 more lines]
+````
+
+
 CRITICALLY ASSESS WHAT GEMINI ASSESSED, discuss with me
 
-### 13. 2026-11-14 08:48:18 UTC
+### 11. 2026-11-14 08:48:18 UTC · tab `0569cc96`
 
 - i dont have the budget for claude api, thats why i was looking into local slms
 
 - this is the real problem statement text:
 
-[Problem statement text omitted for privacy]
+````text
+Business Context / Problem
+Manage similarity flags, evidence, reviewer assignment, case timelines and appeal outcomes with due process.
 
-### 14. 2026-11-14 08:50:31 UTC
+Objective and Scope
+Build a working solution for this end-to-end workflow: Manage similarity flags, evidence, reviewer assignment, case timelines and appeal outcomes with due process. The solution should expose key decisions and exceptions, preserve traceability, and produce measurable outputs. Medium complexity means multiple related entities, conditional rules, at least one exception path and meaningful evaluation metrics.
+
+Primary Actors / Systems
+Learner, instructor, academic administrator, support staff and platform administrator
+
+Business Workflow and Rules
+1. Generate/reference master data first: Learner, Assessment, Submission, SimilarityReport, IntegrityRule.
+2. Generate dependent transaction/event records using valid parent IDs.
+3. Apply business logic: Create assessment submissions; generate synthetic similarity reports and evidence references; define thresholds that trigger review rather than automatic guilt; assign reviewers; capture decisions and rationale; support appeals and case closure.
+4. Persist state changes as explicit records/events where relevant; do not overwrite history.
+5. Generate outcomes and ground-truth labels from documented rules, not independent random assignment.
+
+Entities and Relationships
+Core entities: Learner, Assessment, Submission, SimilarityReport, IntegrityRule, Case, EvidenceItem, Reviewer, Decision, Appeal. Define a primary key for every entity and foreign keys for every relationship. Document cardinality (1:1, 1:N, N:M), optional relationships, effective dates and lifecycle states. Use bridge tables for many-to-many relationships; retain event history for state changes; validate all joins. For deliberate anomaly cases, keep an issue_type/ground_truth label rather than silently corrupting unrelated rows.
+
+ID / Nomenclature Conventions
+SUB-2026-000001; SIM-<submission-id>-01; INT-2026-000001; EVD-<case-id>-001; APL-<case-id>-01.
+
+Synthetic Data Generation Instructions (Granular)
+Step 1 — Write a data dictionary for: Learner, Assessment, Submission, SimilarityReport, IntegrityRule, Case, EvidenceItem, Reviewer, Decision, Appeal. For each field specify type, required/optional, allowed values, units, uniqueness and validation rule.
+Step 2 — Create parent/master tables first, then child and event tables. Apply this domain-specific generation logic: Create assessment submissions; generate synthetic similarity reports and evidence references; define thresholds that trigger review rather than automatic guilt; assign reviewers; capture decisions and rationale; support appeals and case closure.
+Step 3 — Apply deterministic IDs and naming: SUB-2026-000001; SIM-<submission-id>-01; INT-2026-000001; EVD-<case-id>-001; APL-<case-id>-01. Keep counters zero-padded, IDs immutable, and referenced IDs exactly consistent across files.
+Step 4 — Generate the baseline volume: Generate 10,000 submissions, 1,000 flags and 300 cases. Include legitimate quoted material, shared templates, false positives, multiple reviewers and successful appeals. Use a fixed seed (e.g. 20261022) and parameterize scale so starter and full datasets use the same generator.
+Step 5 — Generate valid baseline records first, then inject labelled edge cases: Flag automatically treated as guilt; reviewer has conflict; evidence added after decision without history; appeal closed without independent review.
+Step 6 — Calculate derived values (totals, balances, scores, statuses and dates) from source records rather than generating them independently.
+Step 7 — Produce a separate ground_truth.csv/json for known anomalies, expected decisions or labels; never leak it into input features.
+Step 8 — Run validation: primary-key uniqueness, foreign-key integrity, allowed enums, date ordering, arithmetic reconciliation, lifecycle transitions and duplicate checks.
+Step 9 — Export CSV/JSON/SQL seed data plus README, schema/data dictionary, generator command, fixed seed, source manifest and validation summary.
+Step 10 — Regenerate twice with the same seed and compare row counts/checksums to demonstrate reproducibility.
+
+Suggested Volume and Coverage
+Generate 10,000 submissions, 1,000 flags and 300 cases. Include legitimate quoted material, shared templates, false positives, multiple reviewers and successful appeals.
+
+Required Edge Cases / Negative Scenarios
+Flag automatically treated as guilt; reviewer has conflict; evidence added after decision without history; appeal closed without independent review.
+
+[... 8 more lines]
+````
+
+### 12. 2026-11-14 08:50:31 UTC · tab `0569cc96`
 
 we need a 3 tier architecture, frontend, backend, database.
 
 i was thinking, react, fastapi, sqllite? thoughts. critically assess, and try to break and improve
 
-### 15. 2026-11-14 08:52:52 UTC
+### 13. 2026-11-14 08:52:52 UTC · tab `0569cc96`
 
 is there a con with sqllite?
 
-### 16. 2026-11-14 08:53:40 UTC
+### 14. 2026-11-14 08:53:40 UTC · tab `0569cc96`
 
 okay so u would say postgres? then? we just stick with postgres as a db layer?
 
-### 17. 2026-11-14 08:57:27 UTC
+### 15. 2026-11-14 08:57:27 UTC · tab `0569cc96`
 
 lets go with postgres then, i have docket desktop running for u. so postgres is the way to go. since they explicitly mentioned a 3 tier architecture. now i want u to critically assess if we are gonna keep the local model or keep it fully deteministic
 
-### 18. 2026-11-14 08:59:33 UTC
+### 16. 2026-11-14 08:59:33 UTC · tab `0569cc96`
 
 what can the ai provide of actual use, actual help? maybe we can run cases assigned to review, and try to get ai to explain why it was flagged so? some other ideas which actually make applied ai useful?
 
-### 19. 2026-11-14 09:01:18 UTC
+### 17. 2026-11-14 09:01:18 UTC · tab `0569cc96`
 
 okay now assess, if they make sense or are we forcing it
 
-### 20. 2026-11-14 09:02:30 UTC
+### 18. 2026-11-14 09:02:30 UTC · tab `0569cc96`
 
 okay lets focus on the core first then, this layer as an add on?
 
-### 21. 2026-11-14 09:07:19 UTC
+### 19. 2026-11-14 09:07:19 UTC · tab `0569cc96`
 
 also i want a folder of docs and a folder for decisions and why we are taking them, and i want a new public repo on github named Yottaflex_Hackathon_006822. set up so the project is wired up for best engineering practises and proper validations and stuff too. git ignore our things which arent submission relevant, like our template stuff.
 
 
 - wait are we sql lite based? not postgress?
 
-### 22. 2026-11-14 09:14:47 UTC
+### 20. 2026-11-14 09:14:47 UTC · tab `0569cc96`
 
 and i want a clean industry standard folder structure thats clean, like proper folder structure and navigation. set it up so. i want frontend and backend not to clash and intertwine. clean folder structure that makes it readable. and also remember we wont be running tests for each small thing, we will only write conscise, clean tests and run them at appropriate check points to save tokens.
 
-### 23. 2026-11-14 09:18:39 UTC
+### 21. 2026-11-14 09:18:39 UTC · tab `0569cc96`
 
+[image]
 look at this way too cluttered, re organise the repo to be clean in the start and we can navigate and open more larter on. also set the global config safe thing.
 
-### 24. 2026-11-14 09:18:39 UTC
+### 22. 2026-11-14 09:18:39 UTC · tab `0569cc96`
 
-[Image: source: C:\Users\hiox2\AppData\Local\Temp\claude\645942e2cdeea9bf\0569cc96-5ce6-4075-90e5-d2034c4d5f2b\images\1.png]
+[image]
 
-### 25. 2026-11-14 09:21:31 UTC
+### 23. 2026-11-14 09:21:31 UTC · tab `0569cc96`
 
 i also want u to set proper guardrails and make sure we use simple code and dont over engineer and over complicate things, keep things simple and readible, and clean documentation.
 
-### 26. 2026-11-14 09:24:26 UTC
+### 24. 2026-11-14 09:24:26 UTC · tab `0569cc96`
 
 are we missing anything in out set up processes? what are we missing
 
-### 27. 2026-11-14 09:29:53 UTC
+### 25. 2026-11-14 09:29:53 UTC · tab `0569cc96`
 
 we wont be pushing the db to github, we will only generate it or something, docker containers/images are the way to go.
 
@@ -327,34 +299,66 @@ we do need a way to load schema and seed data into postgres.
 
 i want you to orchestrate these with haiku agents and finish it up, optimize for token usage dont go overkill,
 
-### 28. 2026-11-14 09:50:31 UTC
+### 26. 2026-11-14 09:42:50 UTC · tab `4e8e9d80`
+
+the actual hld, best practises for us, without overdoing it. then /plan backend, /plan frontend, /plan db design. document these plans in a folder , once we have all three plans, run a opus agent to review, fix and improve the plans critically, asking what we were missing, u can make use of our templates research and knowledge base for this.
+
+### 27. 2026-11-14 09:50:31 UTC · tab `0569cc96`
 
 idk why u started working, i assigned another tab to make a plan and get it reviewed, once we get it we will re assess and decide what to do. got it?
 
-### 29. 2026-11-14 09:55:55 UTC
+### 28. 2026-11-14 09:55:55 UTC · tab `0569cc96`
 
-[Problem statement text omitted for privacy]
+````text
+The HLD, the three plans and the Opus review are written in docs/plans/. The review changed all four plans and wrote docs/plans/04-review.md.
+
+What the review found. It logged 23 findings, and the main ones are fixed in the plans:
+
+Score scale: the plans disagreed on whether scores are 0–1 or 0–100. They are now 0–1 everywhere, with thresholds 0.30, 0.60 and 0.80.
+Flags: the old rule could never produce the "quote only" or "template match" dismissal reasons. A flag is now a report with raw score at or above 0.60, and it is a database view instead of a table. A case opens when the adjusted score still reaches the review band.
+Validator vs auditor: the validator would have failed on the injected anomalies. The validator now checks data quality and must pass. The auditor checks due process and finds the labelled anomalies.
+UI actions: the UI needed an allowed_actions field that no endpoint provided. It is added, and role failures now return 401 or 403.
+Evaluation: the auditor scores about 1.0 on its own injections by construction, so that number says little. The review added triage and decision agreement against the hidden scenarios, with documented noise.
+Checks.
+
+Size: the plans run 72–155 lines each.
+Coverage: my loop found no mention of D2, D3, D4 or F2. Those are probably covered inside ranges like "D1-D6", but I haven't confirmed that. 04-review.md has a full coverage table you can check.
+Links: I linked the plans from docs/README.md.
+Uncommitted changes I didn't make. git status shows edits to database/schema.sql, docs/DATA_DICTIONARY.md and ruff.toml. It also shows new backend files under datagen/, validation/, auditor/ and rules/, plus new integration tests. The review agent says it touched only docs/plans/, and my work was docs only. Another session or you may be building from the old design. The plans now say that design is superseded, so those files may conflict with them. Please check where they came from before they get committed.
+
+Open questions, with the reviewer's default:
+
+Should auto-dismissed flags need a human to confirm them? Default: no.
+Is "same department means conflict" too strict? Default: keep it.
+How long is the appeal window? Default: 14 days.
+Do we commit the full-scale data? Default: the manifest only.
+Can a reviewer be removed from a case? Default: no.
+Do we build the AI brief? Default: only if steps 1–6 are verified by the 85% mark.
+I can also turn the plans into new decision records and rewrite architecture.md as a pointer to the HLD, if you want.
+````
+
+
 this is the response, u can go through the files it made. what do u think?
 
-### 30. 2026-11-14 09:59:25 UTC
+### 29. 2026-11-14 09:59:25 UTC · tab `0569cc96`
 
 i want to work on the frontend with a frontend agent in one tab, one for backend, u can orchestrate as in u can ask reports in a certain place and communicate with those tabs from there when i ask u too. this should save time and save tokens as its better than multiagents as they burn up the token usage right? thoughts?
 
-### 31. 2026-11-14 10:02:42 UTC
+### 30. 2026-11-14 10:02:42 UTC · tab `0569cc96`
 
 yeah makes sense, cleanly set it up so we dont have problems. then give me the prompts to give them. make them detailed, and also check if we would save tokens and keep a good code quality if we used a couple of haiku agents orchestrating in these tabs rather than a sonnet agent doing all the work. discuss internally and tell me the decision
 
-### 32. 2026-11-14 10:12:34 UTC
+### 31. 2026-11-14 10:12:34 UTC · tab `0569cc96`
 
 also for the frontend think about the actual user experience and who we are building for, and also make it transparent so we know how the engine works internally, but i dont want to bore the users, so i want a creative look and design, do u have any ideas? or u could tell the tab to temporirly get the best skills for frontend and use claude design or whatever stuff? something like that? tweak the prompt to have more depth like this, and tweak the backend prompt to be strictly deterministic and clean. maybe ask for relevant skills there too, and also do we need a tab for db stuff specifically? with relevant skills? first discuss with urself and then tell me, then after confirmation u can make changes
 
-### 33. 2026-11-14 10:15:27 UTC
+### 32. 2026-11-14 10:15:27 UTC · tab `0569cc96`
 
 yeah. confirmation u get.
 
 also i want u to make use of our local kbs, and get the tabs to use them too, if useful.
 
-### 34. 2026-11-14 10:15:46 UTC
+### 33. 2026-11-14 10:15:46 UTC · tab `0569cc96`
 
 Quickstart, for the Artifact types Anthropic lists. For a dashboard, metrics page, KPI tracker or scorecard, start from the Dashboard type (listed as "Data"): publish with `type_url`: "https://claude.ai/artifact/GZLZthZ2sQjn7T16skfdeF", a `title`, no files and `auto_open: "after_first_write"`, then follow the instructions that result carries. For a whiteboard, start from the Whiteboard type: publish with `type_url`: "https://claude.ai/artifact/PLsEyfjXbDUM1iasW7rjLR", a `title`, no files and `auto_open: "after_first_write"`, then follow the instructions that result carries. If a listed type fits what the user wants, start from it: publish with its `type_url`, a `title`, no files and, unless its content is written through a connector such as Claude Docs, `auto_open: "after_first_write"`, then follow the instructions that result carries. Otherwise make a plain page, or for a spreadsheet the file you would have made without this result.
 
@@ -485,62 +489,653 @@ Review the design plan against the subject before building: if any part of it re
 - Match complexity to the vision. Maximalist directions need elaborate execution; minimal directions need precision in spacing, type, and detail. Elegance is executing the chosen vision well.
 - Put your boldness in one place; keep everything around it quiet. If the accent clashes with the background, shift it toward an analogous hue or desaturate it instead of replacing it.
 
-### 35. 2026-11-14 10:22:16 UTC
+### 34. 2026-11-14 10:22:16 UTC · tab `0569cc96`
 
 also for frontend maybe u can connect with famous ui libraries mcp or something? thats a good idea right?
 
-### 36. 2026-11-14 10:23:25 UTC
+### 35. 2026-11-14 10:23:25 UTC · tab `0569cc96`
 
 i think using existing libraries saves time and effort right? we dont need to do everything?
 
-### 37. 2026-11-14 10:24:16 UTC
+### 36. 2026-11-14 10:24:16 UTC · tab `0569cc96`
 
 yes go on, then give me the three prompts that i will paste into those tabs
 
-### 38. 2026-11-14 10:25:55 UTC
+### 37. 2026-11-14 10:25:55 UTC · tab `0569cc96`
 
 wait whats the before the start stuff, do them and lmk when i should copy paste the prompts
 
-### 39. 2026-11-14 10:28:51 UTC
+### 38. 2026-11-14 10:26:56 UTC · tab `1b27bd45`
+
+Read _template/tab-prompts/database.md and follow it exactly. Start with its reading list, then D1. Use your own database: set $env:DATABASE_URL="postgresql://integrity:integrity_dev@localhost:5433/integrity_dbtab" in your shell before running anything against Postgres.
+
+### 39. 2026-11-14 10:27:07 UTC · tab `e9c7f04e`
+
+Read _template/tab-prompts/backend.md and follow it exactly. Start with its reading list, then M1. Use your own database: set $env:DATABASE_URL="postgresql://integrity:integrity_dev@localhost:5433/integrity_api" in your shell before running anything against Postgres.
+
+### 40. 2026-11-14 10:27:51 UTC · tab `ca6ff057`
+
+Read _template/tab-prompts/frontend.md and follow it exactly. Start with its reading list, then M1. Open _template/design/case-mock.html in a browser for the visual reference. (i dont like the visual reference design particularly tho, so feel free to use ur skills and ideas to make it a different level.
+
+### 41. 2026-11-14 10:28:51 UTC · tab `0569cc96`
 
 how much work are they assigned? small or will they take their time?
 
-### 40. 2026-11-14 10:48:37 UTC
+### 42. 2026-11-14 10:48:37 UTC · tab `0569cc96`
 
 frontend:
 
-[Problem statement text omitted for privacy]
+````text
+M1 is committed and pushed (1e50d13). Typecheck, lint and 2 Vitest tests pass.
+
+Built: router, actor picker (sends X-Actor-Id), "Show the engine" switch (state only for now), fixture-mode API client, and light and dark design tokens. The Queue page opens on "Needs you", has filter tiles, band and "assigned to me" filters, a Dismissed-flags tab and Load more.
+Design: I didn't copy the mock. It has a dark gradient top bar, row cards with a band-coloured edge, and a drawn similarity strip with threshold ticks. I haven't opened it in a browser yet, so the visuals are unchecked.
+Not done yet: Case, Rules and Audit are placeholders. I skipped the artifact-design and dataviz skills and used the design-notes tokens directly.
+Assumption: the tile counts only cover the 200 newest loaded rows, because needs_my_action can't be filtered on the server. I noted this in docs/status/frontend.md under contract change requests.
+Dependencies added: react-router-dom, @tanstack/react-query and lucide-react, all pinned.
+Fixtures: they are typed .ts files, not raw JSON, so the compiler checks them against the contract types.
+Removed: I deleted the old health-check App.test.tsx.
+Next is M2: the Case page and the Rules page.
+````
+
+
 backend:
 
-[Problem statement text omitted for privacy]
+````text
+M1 is committed and pushed (8587c2c). Ruff is clean on my files and the 35 unit tests pass. mypy has 2 errors, both in cli.py and described below.
+
+Built:
+ids, models (contract enums and shapes), clock and errors.
+Pure rules/: band_for, triage, explain_triage, conflicts and independence, TRANSITIONS, action_checks, allowed_actions and the guards.
+A CLI skeleton, and boundary tests at 0.299, 0.300, 0.599, 0.600, 0.799 and 0.800.
+Rule choices I made:
+A dismissal tie goes to template_match.
+A check refuses on role first, then state, then specifics.
+There is no deadline for filing an appeal.
+Closing from decided needs the 14-day window to have elapsed.
+mypy: cli.py imports integrity.validation.run_checks and integrity.auditor.audit, which the database tab hasn't exported from those packages yet. It clears once they do.
+Contract change request: support staff and administrators can't decide, so assigning them would strand a case. My default is a 422 on assignment, with them listed as ineligible. The request is in docs/status/backend.md.
+Commit hook: the pre-commit ruff hook rejected datagen/common.py because the datagen exemption in ruff.toml is still uncommitted. I added an inline noqa there. The orchestrator may want to commit the ruff.toml change.
+Next: M2, starting with datagen against the database tab's new schema.sql (commit e2095de).
+````
+
+
 db:
 
-[Problem statement text omitted for privacy]
+````text
+D1 is committed and pushed (e2095de), and the schema smoke test passes: 13 tests, run against integrity_dbtab.
+
+Schema: database/schema.sql now matches the plans with the scope cuts. It has the 13 tables, the append-only triggers, the generated adjusted_score, and the views v_case_status, v_flag and v_case_queue.
+Loader: integrity.dbload.load(scale) resets public, applies the schema and the seed, and fixes the case_event identity sequence, all in one transaction. I only ran it with no seed, because data/<scale>/seed.sql doesn't exist yet.
+Checks: ruff and mypy are clean on the files I touched, and the pre-commit hooks passed.
+For the backend tab: docs/status/database.md lists the schema facts datagen needs, including seed order and the v_flag.dismissal_reason tie rule. The assessment.kind values and the v_case_queue.effective_outcome mapping for appeals are my choices, so the backend tab should confirm them.
+Test location: I kept my tests in backend/tests/integration/ next to the shared con fixture, not in backend/tests/db/ as the prompt says. That way the backend tab can reuse the fixture.
+Stale drafts: the old test_auditor.py and test_validation.py and the validation/ and auditor/ drafts are still in the tree and don't match the new schema. I'll replace them in D2 and D3.
+Next is D2 (dictionary and validator, due 17:05).
+````
+
+
 should i ask them to prompt loop or is it better this way?
 
-### 41. 2026-11-14 10:52:04 UTC
+### 43. 2026-11-14 10:51:13 UTC · tab `1b27bd45`
+
+Read docs/status/orchestrator.md (new decisions; contract is now v1.2). First, export run_checks and audit from the validation and auditor package __init__ files (a stub that raises NotImplementedError is fine) and push, so the backend's mypy and CI go green. Then continue D2, D3 and D4 without stopping between milestones; stop only if blocked, if you need a decision, or when D4 is done.
+
+### 44. 2026-11-14 10:51:22 UTC · tab `e9c7f04e`
+
+Read docs/status/orchestrator.md (new decisions; contract is now v1.2). Apply decisions 2 and 3: a dismissal tie is quote_only (add a unit test), and assigning support staff or administrators returns 422 VALIDATION_ERROR with ROLE_CANNOT_REVIEW. Contract v1.2 also adds a needs_my_action filter and a counts object on GET /queue. schema.sql is committed (e2095de); read docs/status/database.md for the schema facts. Continue M2, M3 and M4 without stopping between milestones; stop only if blocked, if you need a decision, or when M4 is done.
+
+### 45. 2026-11-14 10:51:30 UTC · tab `ca6ff057`
+
+Read docs/status/orchestrator.md (new decisions; contract is now v1.2). Use the new GET /queue counts object for the filter tiles and drop the 200-row workaround, and add the needs_my_action filter to the client and fixtures. At M2 do one visual check of Queue and Case in light and dark with whatever browser or screenshot tool you have, and fix obvious problems once. Continue M2, M3 and M4 without stopping between milestones; stop only if blocked, if you need a decision, or when M4 is done.
+
+### 46. 2026-11-14 10:52:04 UTC · tab `0569cc96`
 
 while they are working, what do u think we should do?
 
-### 42. 2026-11-14 10:55:21 UTC
+### 47. 2026-11-14 10:55:21 UTC · tab `0569cc96`
 
 Review the schema now (read-only). It was committed at D1 and everyone builds on it, so a mistake there costs the most later. I'd check it against the plan, the four anomaly definitions and the contract, then post findings in docs/status/orchestrator.md. This is the best use of the waiting time.
 
 okay review
 
-### 43. 2026-11-14 11:04:35 UTC
+### 48. 2026-11-14 10:58:43 UTC · tab `ca6ff057`
 
-[Problem statement text omitted for privacy]
+`/simplify → 4 cleanup agents in parallel → apply the fixes`
+
+You are improving the quality of the changed code, not hunting for bugs. Review
+it for reuse, simplification, efficiency, and altitude issues, then fix what you
+find. Do not look for correctness bugs — that is what `/code-review` is for.
+
+## Phase 0 — Gather the diff
+
+Run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` / `git diff HEAD~1`
+if there's no upstream) to get the unified diff under review. If there are
+uncommitted changes, or the range diff is empty, also run `git diff HEAD` and
+include the working-tree changes in scope — the review often runs before the
+commit. If a PR number, branch name, or file path was passed as an argument,
+review that target instead. Treat this diff as the review scope.
+
+## Phase 1 — Review (4 cleanup agents in parallel)
+
+Launch **4 independent review agents** via the Agent tool, all in a
+single message so they run concurrently. Pass each agent the diff and one of
+the four angles below. Each returns its findings with `file`, `line`, a
+one-line `summary`, and the concrete cost (what is duplicated, wasted, or
+harder to maintain).
+
+### Reuse
+
+Flag new code that re-implements something the codebase
+already has — Grep shared/utility modules and files adjacent to the change,
+and name the existing helper to call instead.
+
+### Simplification
+
+Flag unnecessary complexity the diff adds: redundant or derivable state,
+copy-paste with slight variation, deep nesting, dead code left behind. Name
+the simpler form that does the same job.
+
+### Efficiency
+
+Flag wasted work the diff introduces: redundant computation or repeated I/O,
+independent operations run sequentially, blocking work added to startup or
+hot paths. Also flag long-lived objects built from closures or captured
+environments — they keep the entire enclosing scope alive for the object's
+lifetime (a memory leak when that scope holds large values); prefer a
+class/struct that copies only the fields it needs. Name the cheaper
+alternative.
+
+### Altitude
+
+Check that each change fixes the root cause at the right depth rather than
+patching a symptom with a fragile bandaid. Special cases layered on shared
+infrastructure are a sign the fix isn't deep enough — prefer the simpler, more
+general change to the underlying mechanism over adding special cases, and name
+that change.
+
+## Phase 2 — Apply the fixes
+
+Wait for all four agents to complete, dedup findings that point at the same
+line or mechanism, and fix each remaining one directly. Skip any finding whose
+fix would change intended behavior, require changes well outside the reviewed
+diff, or that you judge to be a false positive — note the skip rather than
+arguing with it. Finish with a brief summary of what was fixed and what was
+skipped (or confirm the code was already clean).
+
+### 49. 2026-11-14 10:59:19 UTC · tab `1b27bd45`
+
+Review target: `Scope: only my database-tab files: database/schema.sql, backend/src/integrity/{dbload.py,validation/,auditor/}, backend/tests/integration/{conftest,test_schema,test_validation,test_auditor}.py. Do not touch other paths. Keep behaviour; tests in backend/tests/integration must still pass (DATABASE_URL set to integrity_dbtab).`
+
+`/simplify → 4 cleanup agents in parallel → apply the fixes`
+
+You are improving the quality of the changed code, not hunting for bugs. Review
+it for reuse, simplification, efficiency, and altitude issues, then fix what you
+find. Do not look for correctness bugs — that is what `/code-review` is for.
+
+## Phase 0 — Gather the diff
+
+Run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` / `git diff HEAD~1`
+if there's no upstream) to get the unified diff under review. If there are
+uncommitted changes, or the range diff is empty, also run `git diff HEAD` and
+include the working-tree changes in scope — the review often runs before the
+commit. If a PR number, branch name, or file path was passed as an argument,
+review that target instead. Treat this diff as the review scope.
+
+## Phase 1 — Review (4 cleanup agents in parallel)
+
+Launch **4 independent review agents** via the Agent tool, all in a
+single message so they run concurrently. Pass each agent the diff and one of
+the four angles below. Each returns its findings with `file`, `line`, a
+one-line `summary`, and the concrete cost (what is duplicated, wasted, or
+harder to maintain).
+
+### Reuse
+
+Flag new code that re-implements something the codebase
+already has — Grep shared/utility modules and files adjacent to the change,
+and name the existing helper to call instead.
+
+### Simplification
+
+Flag unnecessary complexity the diff adds: redundant or derivable state,
+copy-paste with slight variation, deep nesting, dead code left behind. Name
+the simpler form that does the same job.
+
+### Efficiency
+
+Flag wasted work the diff introduces: redundant computation or repeated I/O,
+independent operations run sequentially, blocking work added to startup or
+hot paths. Also flag long-lived objects built from closures or captured
+environments — they keep the entire enclosing scope alive for the object's
+lifetime (a memory leak when that scope holds large values); prefer a
+class/struct that copies only the fields it needs. Name the cheaper
+alternative.
+
+### Altitude
+
+Check that each change fixes the root cause at the right depth rather than
+patching a symptom with a fragile bandaid. Special cases layered on shared
+infrastructure are a sign the fix isn't deep enough — prefer the simpler, more
+general change to the underlying mechanism over adding special cases, and name
+that change.
+
+## Phase 2 — Apply the fixes
+
+Wait for all four agents to complete, dedup findings that point at the same
+line or mechanism, and fix each remaining one directly. Skip any finding whose
+fix would change intended behavior, require changes well outside the reviewed
+diff, or that you judge to be a false positive — note the skip rather than
+arguing with it. Finish with a brief summary of what was fixed and what was
+skipped (or confirm the code was already clean).
+
+### 50. 2026-11-14 11:04:35 UTC · tab `0569cc96`
+
+````text
+M2, M3 and M4 are built, committed and pushed (128dad7). Lint, typecheck, build and all 8 Vitest tests pass. I could not test the live API because the backend wasn't running.
+
+v1.2: the queue tiles now use the counts object from GET /queue. The needs_my_action and status filters are sent to the server, and the client and fixtures both handle them. The 200-row workaround is gone.
+M2: the Case page and Rules page are done. I checked Queue and Case in light and dark with headless Chrome screenshots and fixed three things: the gate grid, the "no appeal" state on the journey rail, and the actor select width.
+M3: all eight write actions run from action_checks. Each opens in a dialog that shows the server's refusal message. simplify ran once, and I applied its findings except two. I kept the decision form's required-rationale and cited-evidence checks, because you asked for them. I kept @radix-ui/react-dialog rather than switching to a native <dialog>, because it's on the allowlist.
+M4: the Audit page is built, and live API is now the default. Run VITE_USE_FIXTURES=true npm run dev for the offline fixture demo. In fixture mode, writes return an error by design.
+Not checked:
+
+The switch to the live API and the real response shapes are untested.
+The action dialogs and the Audit page have no screenshot check yet.
+For the orchestrator (also in docs/status/frontend.md):
+
+GET /queue?status= must accept a comma list. The tiles send values like status=open,under_review.
+I guessed the /audit/metrics and /audit/validation shapes, so the backend should send the final ones.
+````
+
+
 frontend
 
-### 44. 2026-11-14 11:08:15 UTC
+### 51. 2026-11-14 11:08:15 UTC · tab `0569cc96`
 
-[Problem statement text omitted for privacy]
+````text
+D1–D3 are committed and pushed. D4 is blocked: the backend datagen isn't finished, so there's no data/starter/seed.sql to run the validator and auditor on.
+
+D1: database/schema.sql and integrity.dbload.load(scale) are in. 14 schema tests pass, including the check that the dictionary lists every schema column.
+D2: the validator is in, with 15 checks, run_checks, summarize, a validation_summary.md writer, and python -m integrity.validation [--write PATH]. A clean fixture gives zero violations, each check catches its own violation, and the G1–G3 anomaly rows still pass. The data dictionary is rewritten to match the schema.
+D3: the auditor is in, with detectors G1–G4 written in SQL from the brief. Each has a test that finds the positive case and ignores its decoy.
+Finding ids: entity_id is decision_id for G1, reviewer_id for G2, evidence_id for G3 and appeal_id for G4.
+G4: the appeal reviewer counts as not independent if they are missing, assigned to the case, a decision author, the instructor, in the learner's department, or have reviewed that learner.
+Checks: all 38 db tests pass. ruff passes on my files. mypy passes on my files, but the full run shows 2 errors in datagen/cases.py (the backend tab's).
+Stubs: the run_checks and audit stubs the orchestrator asked for are replaced by the real functions.
+Simplify: I did the one simplify pass inline instead of spawning four agents. The conflict detector now computes its reasons once, and the validator CLI no longer runs the checks twice.
+Open assumptions the backend tab must match (listed in docs/status/database.md):
+
+case_event.ref_id points at the reviewer id for assignments, the evidence id, the decision id, or the appeal id for appeal events.
+A case's first event must be case_opened at its opened_at.
+Event transitions follow the table in the dictionary.
+The G1 rows are the likeliest to fail D4 on transitions: a decision with no reviewer needs a legal under_review → decided event.
+
+Next, once the backend commits a seed: run python -m integrity.dbload --scale starter, then the validator and auditor, on starter and full. Fix any mismatches through the status files.
+````
+
+
 db.
 
 also i didnt run the new tab for frontend, does this change anything?
 
-### 45. 2026-11-14 11:22:13 UTC
+### 52. 2026-11-14 11:17:04 UTC · tab `e9c7f04e`
 
-[Problem statement text omitted for privacy]
+Review target: `Scope: only my backend paths changed since commit 2b6804d (backend/src/integrity/{services,api,queries,eval,schemas.py,cli.py,db.py}, backend/tests/api). Do not touch dbload.py, validation/, auditor/, tests/integration/conftest.py, or anything outside backend/. Keep behaviour identical; run no tests except ruff on those paths.`
+
+`/simplify → 4 cleanup agents in parallel → apply the fixes`
+
+You are improving the quality of the changed code, not hunting for bugs. Review
+it for reuse, simplification, efficiency, and altitude issues, then fix what you
+find. Do not look for correctness bugs — that is what `/code-review` is for.
+
+## Phase 0 — Gather the diff
+
+Run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` / `git diff HEAD~1`
+if there's no upstream) to get the unified diff under review. If there are
+uncommitted changes, or the range diff is empty, also run `git diff HEAD` and
+include the working-tree changes in scope — the review often runs before the
+commit. If a PR number, branch name, or file path was passed as an argument,
+review that target instead. Treat this diff as the review scope.
+
+## Phase 1 — Review (4 cleanup agents in parallel)
+
+Launch **4 independent review agents** via the Agent tool, all in a
+single message so they run concurrently. Pass each agent the diff and one of
+the four angles below. Each returns its findings with `file`, `line`, a
+one-line `summary`, and the concrete cost (what is duplicated, wasted, or
+harder to maintain).
+
+### Reuse
+
+Flag new code that re-implements something the codebase
+already has — Grep shared/utility modules and files adjacent to the change,
+and name the existing helper to call instead.
+
+### Simplification
+
+Flag unnecessary complexity the diff adds: redundant or derivable state,
+copy-paste with slight variation, deep nesting, dead code left behind. Name
+the simpler form that does the same job.
+
+### Efficiency
+
+Flag wasted work the diff introduces: redundant computation or repeated I/O,
+independent operations run sequentially, blocking work added to startup or
+hot paths. Also flag long-lived objects built from closures or captured
+environments — they keep the entire enclosing scope alive for the object's
+lifetime (a memory leak when that scope holds large values); prefer a
+class/struct that copies only the fields it needs. Name the cheaper
+alternative.
+
+### Altitude
+
+Check that each change fixes the root cause at the right depth rather than
+patching a symptom with a fragile bandaid. Special cases layered on shared
+infrastructure are a sign the fix isn't deep enough — prefer the simpler, more
+general change to the underlying mechanism over adding special cases, and name
+that change.
+
+## Phase 2 — Apply the fixes
+
+Wait for all four agents to complete, dedup findings that point at the same
+line or mechanism, and fix each remaining one directly. Skip any finding whose
+fix would change intended behavior, require changes well outside the reviewed
+diff, or that you judge to be a false positive — note the skip rather than
+arguing with it. Finish with a brief summary of what was fixed and what was
+skipped (or confirm the code was already clean).
+
+### 53. 2026-11-14 11:22:13 UTC · tab `0569cc96`
+
+````text
+/simplify is done. I ran it inline instead of launching the four review agents, since the diff is small and I wrote it. I checked all four angles (reuse, simplification, efficiency, altitude).
+
+Fixed (in read_service.py):
+
+eligible_reviewers built a model, dumped it to a dict and rebuilt it. It now validates one merged dict.
+_matches had a type: ignore because its row was typed dict[str, object]. It now uses dict[str, Any], so the ignore is gone.
+Checked and left alone:
+
+Efficiency: the queue loads every case's facts in one query (about 300 rows, as the orchestrator advised), and nothing else repeats I/O in a hot path.
+Reuse: the write services share begin and step_event, and I found no other duplicated helper in the scoped paths.
+Altitude: row locking, guards and the connection mode sit in shared places, with no special cases layered on top.
+ruff, mypy (61 files) and the 13 API tests pass after the edits. Next in M3 is the one-time security-review of the write endpoints, then the M3 commit.
+````
+
+
 im out of the 5 hour limit (almost), i can move to antigravity ide. i want u to make a clean handover file, well documented about whats remaining, what is left and any other context to help it
+
+### 54. 2026-11-14 12:43:59 UTC · tab `d673594e`
+
+[image]
+first pull from main, we used antigravity to fill in our gaps and finish, idk if it ruined it or we were sloppy from the beginning.
+
+the endpoint in the image is not even openable.
+
+- also u made the front end like a literal html file
+
+https://shadcn-admin.netlify.app/ take ui inspiration from here. revamp frontend end heavily,
+
+-and also our workflow should be like accebile to actual input and test, give a copy pastable prompt which can be put into any ai platform which will return a proper test case format which we can put through our workflow and the front end should cleanly display that, along with other stuff. look into the draft md about the problem statement and check all criterias are being selected.
+
+- also the show engine button doesnt really do anything, i feel like the app is very sloppy, and the tabs dont really make sense either.
+
+basically i want the frontend to actually make sense and work cleanly and wired up cleanly, the backend should be properly wired to the frontend right? and also do we have 10000 generations? with 1000 and 300 and other stuff like the problem statement stated?
+
+youre the sonnet orchestration, use haiku agents swarm to scope out, and assign them tasks, fix and fix and fix. also change color pallete and move it away from the html type of look, give it proper frontend like the inspiration link i said.
+
+### 55. 2026-11-14 12:43:59 UTC · tab `d673594e`
+
+[image]
+
+### 56. 2026-11-14 13:01:08 UTC · tab `d673594e`
+
+do we have an actual workflow now instead of just a static ui? i want a fully functional workflow, and when i select different cases and stuff i want actual navigation and actual workflow steps and also so many users where they have nothing assigned to them, i cant even test anything, manually, to check if its functional or not, make sure that the users i can become can actually do stuff in the workflow. send haiku swarm to check those stuff, and also maybe send helping haiku swarm to help with the integration and testing. dont give too much work to one haiku, make it collectively work
+
+### 57. 2026-11-14 13:02:11 UTC · tab `d673594e`
+
+get a playwright set up and send a couple haikus to click through and find and fix and stuff
+
+### 58. 2026-11-14 13:07:02 UTC · tab `d673594e`
+
+i wanna check manually once, kill current docker and run it and gimme link
+
+### 59. 2026-11-14 13:11:47 UTC · tab `d673594e`
+
+[image]
+the sidebar should be stick right, not going along like this. assign a swarm to fix this
+
+### 60. 2026-11-14 13:11:47 UTC · tab `d673594e`
+
+[image]
+
+### 61. 2026-11-14 13:14:48 UTC · tab `d673594e`
+
+also its very complicated to understand the whole review process, and also out platform should allow the reviewed ones to be cleared or failed, like that control should be there right, and i also want clean ui messages about who can do what and stuff, send swarms to go through and make messages to guide users to use our platform and workflow. SEND SWARMS TO GET WORK DONE
+
+### 62. 2026-11-14 13:18:40 UTC · tab `d673594e`
+
+[image]
+CHANGE THIS TO yottaflex assignment. and i also want a line in the top what our platform/workflow actually does, explaining basically.
+
+also is it expected that the database entries are ran across our workflow? discuss
+
+assign swarm
+
+### 63. 2026-11-14 13:18:40 UTC · tab `d673594e`
+
+[image]
+
+### 64. 2026-11-14 13:21:25 UTC · tab `d673594e`
+
+when we run example cases, that should atleast get displayed in that session right.  assign swarm
+
+also pick apart the brief and send swarms to actually verify.
+
+yes a,b,c go for it, send swarms
+
+### 65. 2026-11-14 13:23:26 UTC · tab `d673594e`
+
+[image]
+and kill and restart so i can manually check current.
+
+and the img. we have so many, just confusing right? we need cleaner.
+
+also send a swarm for a more test cases, load a different variety to get it checked.  send a swarm to build
+
+### 66. 2026-11-14 13:23:26 UTC · tab `d673594e`
+
+[image]
+
+### 67. 2026-11-14 13:27:34 UTC · tab `d673594e`
+
+2. ai not being there is defensible right, make a proper defense up for it, send a swarm to fix these and build and fix and fix
+
+### 68. 2026-11-14 13:30:48 UTC · tab `d673594e`
+
+[image]
+when i open a case, these arent selectable, how can i change the actual stage of the workflow, we need that to be dynamic and changable from out platform right, so our platform can actually assign stuff and those ppl can review and clear or fail or whatever, thats part fo the core right functionality right, send enough of the swarm to get this done asap
+
+### 69. 2026-11-14 13:30:48 UTC · tab `d673594e`
+
+[image]
+
+### 70. 2026-11-14 13:35:19 UTC · tab `d673594e`
+
+and focus on the actually changing stuff in the under review and reviewer stuff, for now make it so the people who are assigned for it have access to change it and it gets logged and it does change the entry atleast in that session, right? send a swarm to do this if its not already being done
+
+### 71. 2026-11-14 13:36:35 UTC · tab `d673594e`
+
+our roles set up has issues right? we dont have the roles n people with the roles working properly
+
+### 72. 2026-11-14 13:39:27 UTC · tab `d673594e`
+
+[image]
+why is it not selectable to fail a learner, is it a bug? if so send a swarm to fix it, or else just document
+
+### 73. 2026-11-14 13:39:27 UTC · tab `d673594e`
+
+[image]
+
+### 74. 2026-11-14 13:39:49 UTC · tab `d673594e`
+
+````text
+It also found three real problems, which I'm queuing as the next round. Several of them touch files that agents are editing right now, so I'm holding them until those finish:
+
+Misleading tab: the "Under review" tab and count include open cases that have no reviewer yet. It needs relabelling or splitting.
+Timeline detail: it shows the decision id but not the outcome, so you can't see "Cleared" or "Failed" in the log. This is a small backend and UI change.
+No way to step aside: there's no recuse or unassign action. A reviewer who discovers a conflict can't step aside, and conflicts are only checked at assignment. Adding a recuse action with a reason, logged as an event, would close the gap. It's a new business rule, so I'll include it in the round unless you say otherwise.
+````
+
+
+send a swarm to fix each of these
+
+### 75. 2026-11-14 13:41:00 UTC · tab `d673594e`
+
+[image]
+change this to yottaflex hackathon, not yottaflex assignement
+
+### 76. 2026-11-14 13:41:00 UTC · tab `d673594e`
+
+[image]
+
+### 77. 2026-11-14 13:42:15 UTC · tab `d673594e`
+
+send swarms to help our agents stuck in long tasks, always send more number for bigger tasks, u can split the task
+
+### 78. 2026-11-14 13:44:59 UTC · tab `d673594e`
+
+[image]
+administrator should be able to close cases for good right, and get the img status to be changed, send a swarm to finish it off
+
+### 79. 2026-11-14 13:44:59 UTC · tab `d673594e`
+
+[image]
+
+### 80. 2026-11-14 13:52:41 UTC · tab `d673594e`
+
+````text
+The frontend review found 11 issues. The ones that matter:
+
+Cases list switch (medium): after switching person, the Cases list keeps showing the previous person's rows until the new fetch returns, with no loading state.
+Test Lab crash loop (medium): a stored session from an older deploy has a different shape and crashes the page on every render. It sits in the same tree as the "Clear session" button, so the only way out is closing the tab.
+Close copy (medium): the "go straight to closing" wording may be stale now that close has a waiver path. The close agent is handling it.
+Small items: the evidence form offers kinds support staff can't submit, ReviewerPicker can hang on "Loading" when eligibility fails, "14 days" is hardcoded though the window is per rule, and a few accessibility issues.
+````
+
+
+send a swarm and fix these
+
+### 81. 2026-11-14 13:53:57 UTC · tab `d673594e`
+
+i dont wanna be caught in a loop of unending bug fixes, i want u to tell me the bare minimum stuff i need to work on before psuhing and submitting.
+
+### 82. 2026-11-14 13:55:41 UTC · tab `d673594e`
+
+yeah freeze
+
+### 83. 2026-11-14 13:57:23 UTC · tab `d673594e`
+
+figure out a way to do that, instead of contending, split cleanl
+
+### 84. 2026-11-14 14:01:57 UTC · tab `d673594e`
+
+check the agents which are running if they already finished and are stuck, i want to wrap it up so quicky finish and we will do one final check to make it submit worth, u can kill agents u think arent priority, like new test cases and stuff
+
+### 85. 2026-11-14 14:05:40 UTC · tab `d673594e`
+
+OKAY SO NOW I DONT REALLY CARE ABOUT RARE BUGS, CHECK THE BUILDING, THE RUN AND THOSE STUFF, MAKE THOSE CLEAN TAKE AS MANY OF THE HAIKU SWARM AS U WANT FINISH OFF THOSE QUICKLY. AND PUSH AND UPDATE README AND DOCKER FILE BREAK AND REBUILD AND TEST, BASICALLY THE FINAL TESTING.
+
+ALSO SEND A SWARM TO DOCUMENT WHY USING AI DOESNT MAKE SENSE HERE.
+
+ALSO CHECK THE CURRENTLY WORKING AGENTS THEY HAVE BEEN WORKING FOR A WHILE
+
+### 86. 2026-11-14 14:08:48 UTC · tab `d673594e`
+
+SEND MULTIPLE AGENTS OF THE SWARM FOR THE TESTS MAN, ONE MIGHT TAKE TOO LONG. GET IT DONE QUICK
+
+### 87. 2026-11-14 14:12:28 UTC · tab `d673594e`
+
+HELP OUT THE FRONT END THING, N CHECK DOCKER IS SETTING UP PROPERLY AND START PUSHING
+
+### 88. 2026-11-14 14:15:21 UTC · tab `d673594e`
+
+START WRAPPING UP WHATEVER WORK IS DONE, SO THAT NO ERRORS ARISE AND FINISH. THE DOCKER IS PRIORITY SO THAT EVERYTHING IS SET UP TO RUN
+
+### 89. 2026-11-14 14:17:24 UTC · tab `d673594e`
+
+KILL EVERYTHING. PUSH EVERYTHING TO MAIN. IM SUBMITTING IM RUNNING OUT OF TIME
+
+
+## 3. Antigravity (Gemini) history
+
+Source: `~/.gemini/antigravity/brain/<conversation>/.system_generated/logs/transcript_full.jsonl` (USER_INPUT records, text inside `<USER_REQUEST>`, deduplicated). Plan and walkthrough files are referenced by name only.
+
+| # | Conversation | Prompts | Date range (UTC) | Plan/walkthrough files (not copied) |
+|---|---|---|---|---|
+| 1 | `e3c2ad3a` | 6 | 2026-11-14 11:29:23 UTC to 2026-11-14 12:22:26 UTC | implementation_plan.md, walkthrough.md |
+
+### 90. 2026-11-14 11:29:23 UTC · conversation `e3c2ad3a`
+
+The handover is written and pushed (8ad6784) at docs/HANDOVER.md, so it's available even if you open a fresh clone. It's 16:55, which leaves about 2.5 hours to the 19:30 deadline.
+
+What the file covers
+
+What the project is and the two graded jobs. The dataset is graded most heavily, so the file says to protect it first.
+Read-first order: the scope document, the frozen contract, the decisions and status files, then the plans.
+State by track, with commit hashes and a clear done / in-progress / missing split.
+Remaining work in order, with rough times:
+Backend M3 and M4.
+Database D4.
+The frontend live-API pass.
+Final docs: README, DEMO.md with pinned case IDs, a fresh-clone test, the prompt-log export, and loading the demo database.
+The optional AI brief.
+Rules that must not break:
+the flag, case and dismissal rule;
+the four anomalies, with decoys;
+validator versus auditor;
+determinism;
+the frozen contract;
+the scope cuts.
+How to run everything on this machine, from Docker through the frontend.
+Gotchas: PowerShell reporting git progress as errors, the per-tab databases, what's git-ignored on purpose, and the limits to state honestly in the README.
+Starter message to paste into the new agent, plus a note on splitting the work across parallel agents.
+Three things to know before you switch
+
+Backend M3 is unfinished and uncommitted. About 30 files exist only on disk: the write endpoints, services, the eval package, their tests, and regenerated starter data. The handover tells the new agent to run git status first and not discard them. Please don't clean the working folder or re-clone over it.
+I fixed one real gap while writing this. The full-scale validation summary is named validation_summary.md, but .gitignore only allowed VALIDATION.md, so it would never have been committed. The ignore rules now allow the summary, validation.json and metrics.json.
+Some state is verified and some is only reported.
+I checked CI was green on 2b6804d, and I checked the CLI usage and the data files myself.
+The tab claims are reported, not independently re-run: the validator's 0 violations, the auditor's 4 and 8/10/8/6 findings, and reproducibility across hash seeds.
+The handover says which is which.
+Questions I couldn't answer for the new agent
+
+What exactly gets submitted: a repo link, a video, slides, or a live demo? It's still the largest open question.
+Is 19:30 still the deadline?
+Keep or delete the handover before submission? Deleting it is harmless.
+The local-only helpers are still in _template/ on this machine: the tab prompts, the design mock and the knowledge base. They'll be there in the new IDE as long as it opens the same folder.
+
+
+understand and tell me in chat, what work and how much is left?
+
+### 91. 2026-11-14 11:31:54 UTC · conversation `e3c2ad3a`
+
+can u handle it, or should i wait for claude code to come back? be critical and assess. tell me first
+
+### 92. 2026-11-14 11:39:03 UTC · conversation `e3c2ad3a`
+
+i want you to be very careful, atmost careful and accurate and, following the building pattern being used so far, we will take everything and keep working as a separate branch on github, only after we confirm everything is done we will continue and try to merge and get everything cleanly lined up to submit.
+
+set up a multiagent orchestration system /plan to do the work, cleanly
+
+### 93. 2026-11-14 12:08:22 UTC · conversation `e3c2ad3a`
+
+cant i have on docker set up and run everything on it, instead of running the three tiers separately?
+
+### 94. 2026-11-14 12:10:02 UTC · conversation `e3c2ad3a`
+
+yeah, set it up, i want simple implementation for it
+
+### 95. 2026-11-14 12:22:26 UTC · conversation `e3c2ad3a`
+
+how do i run it, like where do i run it? terminal?

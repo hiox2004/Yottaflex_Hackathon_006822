@@ -6,7 +6,8 @@ Owned by the orchestrator tab. Backend implements it, frontend consumes it. Chan
 ## Conventions
 - Base path `/api`, JSON in and out, UTF-8. Timestamps are ISO-8601 UTC strings (`2026-03-04T10:15:00Z`). Scores are JSON numbers
   from 0 to 1 with three decimals (`0.623`). IDs are the brief's formats (`CAS-2026-000017`, `EVD-CAS-2026-000017-001`, ...).
-- Actor stub: header `X-Actor-Id: REV-000011` on every request except `GET /health`. Unknown id: 401. Wrong role: 403.
+- Actor stub: header `X-Actor-Id` on every request except `GET /health`: a staff id (`REV-000011`) or a learner id (`LRN-000123`). Unknown id: 401. Wrong role: 403.
+- Learners (role `learner`) see only their own cases: `GET /queue` and `GET /flags` return only their own rows, and any other case is 403 `NOT_YOUR_CASE` ("You can only view your own cases."). Staff-only pages (`/audit/*`, `/lab/*`, `/cases/{id}/eligible-reviewers`) are 403 `ROLE_NOT_ALLOWED` ("Learners cannot use this page."). A learner may add a `learner_statement` to their own open or under-review case, and file an appeal on their own adverse decision inside the window; every other action is `ROLE_NOT_ALLOWED`. Learner actions are recorded with the learner id in `added_by`, `filed_by` and the timeline actor.
 - Errors: HTTP status plus `{"error": {"code": "CONFLICT_OF_INTEREST", "message": "Plain-language text", "details": {}}}`.
 - Writes return the updated `CaseDetail` (200). Pagination: `limit` (default 50, max 200) and `offset`; lists return `{"items": [...], "total": n}`. `GET /queue` accepts `status` as a comma-separated list (`status=open,under_review`).
 - Every write runs in one transaction and also writes a `case_event`.
@@ -22,34 +23,39 @@ Owned by the orchestrator tab. Backend implements it, frontend consumes it. Chan
 | evidence kind | `matched_passage`, `source_reference`, `template_match`, `quote_citation`, `learner_statement` |
 | decision outcome | `no_violation`, `violation_confirmed`, `inconclusive` |
 | appeal outcome | `upheld`, `overturned`, `partially_upheld` |
-| event_type | `case_opened`, `reviewer_assigned`, `evidence_added`, `decision_recorded`, `case_reopened`, `appeal_filed`, `appeal_reviewer_assigned`, `appeal_decided`, `case_closed` |
+| event_type | `case_opened`, `reviewer_assigned`, `evidence_added`, `decision_recorded`, `case_reopened`, `appeal_filed`, `appeal_reviewer_assigned`, `appeal_decided`, `case_closed`, `reviewer_recused` |
 | dismissal_reason | `quote_only`, `template_match` (the larger exclusion; a tie counts as `quote_only`) |
 | issue_type | `AUTO_GUILT_WITHOUT_REVIEW`, `REVIEWER_CONFLICT`, `EVIDENCE_AFTER_DECISION_NO_HISTORY`, `APPEAL_CLOSED_NO_INDEPENDENT_REVIEW` |
-| allowed action | `assign_reviewer`, `add_evidence`, `reopen`, `decide`, `file_appeal`, `assign_appeal_reviewer`, `decide_appeal`, `close` |
+| allowed action | `assign_reviewer`, `add_evidence`, `reopen`, `decide`, `file_appeal`, `assign_appeal_reviewer`, `decide_appeal`, `close`, `recuse` |
 | conflict reason code | `INSTRUCTOR_OF_ASSESSMENT`, `SAME_DEPARTMENT`, `REVIEWED_LEARNER_BEFORE`, `ALREADY_ON_CASE`, `DECIDED_THIS_CASE`, `ROLE_CANNOT_REVIEW` |
-| error codes | `UNKNOWN_ACTOR`(401), `ROLE_NOT_ALLOWED`(403), `NOT_FOUND`(404), `CONFLICT_OF_INTEREST`, `NOT_INDEPENDENT`, `REOPEN_REQUIRED`, `INVALID_TRANSITION`, `NOT_ASSIGNED`, `EVIDENCE_REQUIRED`, `APPEAL_EXISTS`, `NOT_ADVERSE`, `NOT_APPEAL_REVIEWER`, `APPEAL_UNRESOLVED`, `APPEAL_WINDOW_OPEN` (all 409), `VALIDATION_ERROR`(422) |
+| error codes | `UNKNOWN_ACTOR`(401), `ROLE_NOT_ALLOWED`(403), `NOT_YOUR_CASE`(403), `NOT_FOUND`(404), `CONFLICT_OF_INTEREST`, `NOT_INDEPENDENT`, `REOPEN_REQUIRED`, `INVALID_TRANSITION`, `NOT_ASSIGNED`, `EVIDENCE_REQUIRED`, `RATIONALE_TOO_SHORT`, `NO_INCRIMINATING_EVIDENCE`, `APPEAL_EXISTS`, `NOT_ADVERSE`, `NOT_APPEAL_REVIEWER`, `APPEAL_UNRESOLVED`, `APPEAL_WINDOW_OPEN`, `APPEAL_WINDOW_CLOSED`, `SAME_APPEAL_REVIEWER`, `STATEMENT_ONLY`, `RECUSAL_REASON_REQUIRED` (all 409), `VALIDATION_ERROR`(422) |
 
 ## Endpoints
 | Method and path | Purpose | Roles | Body | Response |
 |---|---|---|---|---|
 | GET `/health` | liveness, no actor needed | any | | `{"status":"ok","database":"up"}` |
 | GET `/reviewers` | actor picker | any | | `Reviewer[]` |
+| GET `/actors?role=learner\|staff&q=&limit=20` | actor picker search: `q` matches id, name or department, any case; `role=staff` returns the reviewer rows | any (no actor header needed) | | `{actor_id, name, role, department}[]` |
 | GET `/rules` | rule versions | any | | `Rule[]` |
 | GET `/queue?status=&band=&assigned_to=&needs_my_action=&limit=&offset=` | cases, newest first | any | | `{items: QueueRow[], total, counts: QueueCounts}` |
 | GET `/flags?outcome=dismissed&limit=&offset=` | auto-dismissed flags (read-only) | any | | `{items: DismissedFlag[], total}` |
+| GET `/admin/workload` | staff workload: queue totals, reviewer load, assignment suggestions for the 10 oldest open cases (up to 3 conflict-free reviewers each) | administrator | | `{generated_at, totals: {unassigned, under_review, decided_waiting_close, appeals_waiting_reviewer, appeals_in_review, closed, dismissed_flags}, reviewers: {reviewer_id, name, role, department, active_cases, under_review, decided, appeals_to_decide, total_assigned_ever}[], suggested_for_unassigned: {case_id, learner_name, assessment_title, band, adjusted_score, suggested: {reviewer_id, name, active_cases}[]}[]}` |
 | GET `/cases/{id}` | full case | any | | `CaseDetail` |
-| GET `/cases/{id}/timeline` | append-only history | any | | `TimelineEvent[]` (oldest first) |
-| GET `/cases/{id}/eligible-reviewers?purpose=case\|appeal` | everyone with a verdict | any | | `EligibleReviewer[]` |
+| GET `/cases/{id}/timeline` | append-only history; `detail` says what happened (decision outcome, evidence kind and text, grounds, appeal outcome, reviewer), null for status-only events | any (learner: own case only) | | `TimelineEvent[]` (oldest first) |
+| GET `/cases/{id}/eligible-reviewers?purpose=case\|appeal` | everyone with a verdict | staff (learners: 403) | | `EligibleReviewer[]` |
 | POST `/cases/{id}/reviewers` | assign reviewer | administrator | `{reviewer_id, role_in_case: "primary"\|"secondary"}` | `CaseDetail` |
-| POST `/cases/{id}/evidence` | add evidence | assigned reviewer, support staff (`learner_statement` only) | `{kind, description}` | `CaseDetail` |
+| POST `/cases/{id}/evidence` | add evidence | assigned reviewer, support staff and learner (`learner_statement` only; learner: own case, open or under review) | `{kind, description}` | `CaseDetail` |
 | POST `/cases/{id}/reopen` | decided to under_review | assigned reviewer, administrator | `{reason}` | `CaseDetail` |
-| POST `/cases/{id}/decision` | record decision | assigned reviewer | `{outcome, rationale, cited_evidence_ids: string[]}` | `CaseDetail` |
-| POST `/cases/{id}/appeal` | file appeal for the learner | support staff, administrator | `{grounds}` | `CaseDetail` |
-| POST `/cases/{id}/appeal/reviewer` | assign independent appeal reviewer | administrator | `{reviewer_id}` | `CaseDetail` |
+| POST `/cases/{id}/recuse` | assigned reviewer steps aside while under_review: no status change, the reason is logged as `reviewer_recused` (the reviewer leaves `reviewers`; a replacement primary can then be assigned). A blank reason is `RECUSAL_REASON_REQUIRED` (409) | assigned reviewer only | `{reason}` (max 2000 characters) | `CaseDetail` |
+| POST `/cases/{id}/decision` | record decision; re-checks the conflicts of interest first (`CONFLICT_OF_INTEREST` if the reviewer now has one: recuse instead) | assigned reviewer | `{outcome, rationale, cited_evidence_ids: string[]}` | `CaseDetail` |
+| POST `/cases/{id}/appeal` | file appeal for the learner; refused with `APPEAL_WINDOW_CLOSED` from the window end (decision + `appeal_window_days`) | support staff, administrator, learner (own adverse decision only) | `{grounds}` | `CaseDetail` |
+| POST `/cases/{id}/appeal/reviewer` | assign independent appeal reviewer; in `appeal_review` it reassigns (not the current reviewer, kept in the timeline) | administrator | `{reviewer_id}` | `CaseDetail` |
 | POST `/cases/{id}/appeal/outcome` | decide the appeal | the appeal reviewer | `{outcome, rationale}` | `CaseDetail` |
-| POST `/cases/{id}/close` | close the case | administrator | `{}` | `CaseDetail` |
-| GET `/audit/findings?case_id=` | auditor run live on the database; optional filter to one case | any | | `{counts: {issue_type: n}, findings: Finding[]}` |
-| GET `/audit/metrics`, `/audit/validation` | evaluation and validation summary files | any | | provisional, see below |
+| POST `/cases/{id}/close` | close the case; refused while an appeal is open, and for a confirmed violation inside its appeal window (`APPEAL_WINDOW_OPEN`) unless waived with `{waive_appeal_window: true, reason}` | administrator | `{}` or `{waive_appeal_window, reason}` | `CaseDetail` |
+| GET `/audit/findings?case_id=` | auditor run live on the database; optional filter to one case | staff (learners: 403) | | `{counts: {issue_type: n}, findings: Finding[]}` |
+| GET `/audit/metrics`, `/audit/validation` | evaluation and validation summary files | staff (learners: 403) | | provisional, see below |
+| POST `/lab/run` | Test Lab: run externally written test cases through the pure rules. Stateless, writes nothing; `LabCase` may carry `evidence` (accepted, ignored) | staff (learners: 403) | `{cases: LabCase[]}` (1 to 200 cases) | `LabResponse` (per-case verdicts `pass`, `fail`, `no_expectation`). Malformed input: 422. Models: `backend/src/integrity/services/lab_service.py` |
+| POST `/lab/import` | Test Lab import: turn cases into real records, all or nothing (one transaction). Each case is triaged by the in-force rule; an opened case gets a case, its evidence and a `case_opened` event; dismissed flags and non-flags keep submission and report only (Dismissed tab) | academic_administrator (others: 403 `ROLE_NOT_ALLOWED`) | `{cases: LabImportCase[]}` (1 to 100). `LabImportCase` = `LabCase` plus optional `learner_id`, `assessment_id` (both must exist if given, else round-robin pick) | `{created: {lab_id, submission_id, similarity_report_id, outcome: case_opened \| dismissed \| not_flagged, case_id \| null, evidence_ids: string[]}[]}`. Unknown learner or assessment, bad score or evidence: 422 `VALIDATION_ERROR`, nothing stored. Models: `backend/src/integrity/services/lab_import_service.py` |
 
 ## Shapes (TypeScript notation)
 ```ts
@@ -84,14 +90,16 @@ type CaseDetail = {
   action_checks: ActionCheck[];                   // every action with its verdict and plain-language reasons
 };
 type TimelineEvent = { event_id: number; event_type: EventType; occurred_at: string; actor_id: string | null; actor_name: string | null;
-                       from_status: Status | null; to_status: Status | null; ref_id: string | null; reason: string | null }; // actor null = system
+                       from_status: Status | null; to_status: Status | null; ref_id: string | null; reason: string | null;
+                       detail: string | null }; // actor null = system; detail: see the timeline row
 type EligibleReviewer = Reviewer & { eligible: boolean; reasons: { code: ConflictCode; message: string }[] };
 type Finding = { issue_type: IssueType; case_id: string; entity_id: string; detail: string };
 type ExplainStep = { step: "raw_score" | "exclusions" | "adjusted_score" | "band" | "outcome";
                      text: string;                       // plain language, e.g. "Raw score 0.71 is at or above the review gate 0.60, so this is a flag."
                      value: number | string | null; threshold: number | null };
 type ActionCheck = { action: AllowedAction; allowed: boolean;
-                     reasons: { code: string; message: string }[] };   // reasons empty when allowed; codes reuse the error codes
+                     reasons: { code: string; message: string }[];   // reasons empty when allowed; codes reuse the error codes
+                     waivable?: boolean };   // true for close inside an adverse appeal window for an administrator: offer "Close with waiver" (POST close with {waive_appeal_window: true, reason})
 ```
 `action_checks` (and `allowed_actions`, its allowed subset) is the only source of what the UI may offer. A disallowed action is shown disabled with the
 server's reason (for example `APPEAL_WINDOW_OPEN`: "Appeal window open until 25 Nov 2026"). The UI never re-implements a rule; it shows the server's `message`.

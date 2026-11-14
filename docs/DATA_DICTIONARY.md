@@ -39,12 +39,16 @@ The validator also requires evidence suffixes `001..n`, decision suffixes `01..n
 | Similarity report to Case | 1:0..1 (a flag opens at most one case) |
 | Case to Reviewer | N:M through `case_reviewer` |
 | Case to Evidence item | 1:N (at least one is expected, not enforced) |
-| Case to Decision | 1:N (reopening allows more than one) |
+| Case to Decision | 1:N (reopening allows more than one; in the full seed each of the 8 reopened cases has a single decision, so no seeded case has a second decision) |
 | Decision to Evidence item | N:M through `decision_evidence` (cited evidence) |
 | Case to Appeal | 1:0..1 |
 | Case to Case event | 1:N (history) |
+| Reviewer to Decision | 1:N through `decision.reviewer_id` (46 reviewers decided; NULL only in the 8 injected G1 rows) |
+| Reviewer to Appeal | 1:N through `appeal.reviewer_id` (36 of 45 appeals have a reviewer; 9 are NULL until assigned) |
+| Decision to Appeal | 1:0..1 (each appeal names one decision; 45 of 147 decisions have an appeal) |
+| Reviewer to Case reviewer | 1:N through `case_reviewer.assigned_by` (every assignment row names one of 6 academic administrators) |
 
-Optional by design: `decision.reviewer_id` (NULL only in injected G1 rows), `appeal.reviewer_id` until assigned, appeal outcome fields until decided, `integrity_rule.effective_to` (NULL = current), `case_event.actor_id` (NULL = system), `evidence_item.added_by`.
+Optional by design: `decision.reviewer_id` (NULL only in injected G1 rows), `appeal.reviewer_id` until assigned, appeal outcome fields until decided, `integrity_rule.effective_to` (NULL = current), `case_event.actor_id` (NULL = no named actor, see section 4), `evidence_item.added_by` (NULL = no named actor, see section 4).
 
 ## 3. Lifecycle
 
@@ -58,11 +62,12 @@ Case status is never stored. View `v_case_status` takes the `to_status` of the l
 | `decision_recorded` | `under_review` | `decided` |
 | `case_reopened` | `decided` | `under_review` |
 | `appeal_filed` | `decided` | `appealed` |
-| `appeal_reviewer_assigned` | `appealed` | `appeal_review` |
+| `appeal_reviewer_assigned` | `appealed` | `appeal_review` (reassignment while under review: `appeal_review` to `appeal_review`, reason says who it replaced) |
 | `appeal_decided` | `appeal_review` | `appeal_decided` |
 | `case_closed` | `decided` or `appeal_decided` | `closed` |
+| `reviewer_recused` | `under_review` | `under_review` (no status change; from/to NULL) |
 
-`case_event.ref_id` is the id of what the event is about: reviewer id (`reviewer_assigned`), evidence id, decision id, appeal id (all appeal events); NULL for `case_opened`, `case_reopened`, `case_closed`.
+`case_event.ref_id` is the id of what the event is about: reviewer id (`reviewer_assigned`, `reviewer_recused`), evidence id, decision id, appeal id (all appeal events); NULL for `case_opened`, `case_reopened`, `case_closed`.
 
 ## 4. Tables
 
@@ -155,7 +160,8 @@ Assignments are permanent history (no removal).
 | `kind` | text | yes | `matched_passage`, `source_reference`, `template_match`, `quote_citation`, `learner_statement` | no | DB enum |
 | `description` | text | yes | free text | no | DB non-blank; validator: no duplicate per case and kind |
 | `added_at` | timestamptz | yes | UTC | no | validator: not before `opened_at`; auditor G3: not after the latest decision without a reopen |
-| `added_by` | text | no | reviewer id | no | DB foreign key |
+| `added_by` | text | no | reviewer id; NULL = no named actor (see seed notes), or the learner's id in `added_by_learner_id` | no | DB foreign key |
+| `added_by_learner_id` | text | no | learner id, set only when a learner added the statement (then `added_by` is NULL) | no | DB foreign key |
 
 ### decision
 | Field | Type | Required | Allowed values and units | Unique | Validation |
@@ -164,7 +170,7 @@ Assignments are permanent history (no removal).
 | `case_id` | text | yes | case id | no | DB foreign key |
 | `reviewer_id` | text | no | reviewer id; NULL only in injected G1 rows | no | DB foreign key; auditor G1 |
 | `outcome` | text | yes | `no_violation`, `violation_confirmed`, `inconclusive` | no | DB enum |
-| `rationale` | text | yes | free text | no | DB non-blank |
+| `rationale` | text | yes | free text | no | DB non-blank; service: a `violation_confirmed` rationale is at least 20 characters and cites at least one matched passage or source reference (`RATIONALE_TOO_SHORT`, `NO_INCRIMINATING_EVIDENCE`) |
 | `decided_at` | timestamptz | yes | UTC | no | validator: not before `opened_at` |
 
 ### decision_evidence
@@ -182,7 +188,8 @@ Mutable on purpose: the reviewer and outcome are filled in later. Each change al
 | `decision_id` | text | yes | decision id | no | DB foreign key; validator: a decision of the same case |
 | `grounds` | text | yes | free text | no | DB non-blank |
 | `filed_at` | timestamptz | yes | UTC | no | validator: not before the appealed decision |
-| `filed_by` | text | yes | reviewer id | no | DB foreign key |
+| `filed_by` | text | no | reviewer id; NULL when the learner filed (then `filed_by_learner_id` is set) | no | DB foreign key; exactly one of `filed_by` and `filed_by_learner_id` is set |
+| `filed_by_learner_id` | text | no | learner id, set only when the learner filed the appeal | no | DB foreign key |
 | `reviewer_id` | text | no | reviewer id, NULL until assigned | no | DB foreign key; independence: auditor G4 |
 | `outcome` | text | no | `upheld`, `overturned`, `partially_upheld` | no | DB enum; outcome, rationale and `decided_at` are all NULL or all set |
 | `outcome_rationale` | text | no | free text | no | DB non-blank when set |
@@ -194,13 +201,19 @@ Append-only history of every state change.
 |---|---|---|---|---|---|
 | `case_event_id` | bigint | yes | identity, assigned in insert order | primary key | DB |
 | `case_id` | text | yes | case id | no | DB foreign key |
-| `event_type` | text | yes | `case_opened`, `reviewer_assigned`, `evidence_added`, `decision_recorded`, `case_reopened`, `appeal_filed`, `appeal_reviewer_assigned`, `appeal_decided`, `case_closed` | no | DB enum |
+| `event_type` | text | yes | `case_opened`, `reviewer_assigned`, `evidence_added`, `decision_recorded`, `case_reopened`, `appeal_filed`, `appeal_reviewer_assigned`, `appeal_decided`, `case_closed`, `reviewer_recused` | no | DB enum |
 | `from_status` | text | no | a case status; NULL for non-status events and `case_opened` | no | DB enum; validator: legal pair, chain |
 | `to_status` | text | no | `open`, `under_review`, `decided`, `appealed`, `appeal_review`, `appeal_decided`, `closed` | no | DB enum; `from_status` set implies `to_status` set |
 | `occurred_at` | timestamptz | yes | UTC | no | validator: not before `opened_at`, in id order |
-| `actor_id` | text | no | reviewer id; NULL = system | no | DB foreign key |
+| `actor_id` | text | no | reviewer id; NULL = no named actor (see seed notes), or the learner's id in `actor_learner_id` | no | DB foreign key |
+| `actor_learner_id` | text | no | learner id, set only when a learner acted (a statement or an appeal) | no | DB foreign key |
 | `ref_id` | text | no | id of the row the event is about | no | validator: resolves within the case |
-| `reason` | text | no | free text (reopen reason, close note) | no | none |
+| `reason` | text | no | free text (reopen reason, recusal reason, close note) | no | none |
+
+Seed notes (full seed, `data/full/*.csv`, checked with a script against the files):
+- `case_event.actor_id` is NULL on 908 of 1,594 events: 600 `evidence_added` events, all 300 `case_opened` events, and the 8 `decision_recorded` events of the injected G1 rows (decided with no reviewer, i.e. by the system).
+- `evidence_item.added_by` is NULL on 600 of 676 evidence rows. Those 600 rows have an `evidence_added` event with a NULL `actor_id`. In the seed, NULL means no named actor was recorded; the data does not say whether the item came from a system import.
+- 8 evidence rows have no `evidence_added` event. They are the G3 injections (evidence after a decision, no reopen). The validator does not reconcile evidence rows with events, so they load; the auditor reports them as G3.
 
 ## 5. Views (derived, never stored)
 
@@ -211,3 +224,13 @@ Append-only history of every state change.
 | `v_case_queue` | `case_id`, `learner_id`, `learner_name`, `assessment_title`, `adjusted_score`, `band`, `status`, `closed_at`, `opened_at`, `assignee_ids`, `effective_outcome` | One row per case. `effective_outcome` is the latest decision; an `overturned` appeal gives `no_violation`, `partially_upheld` gives `inconclusive`, `upheld` keeps it. |
 
 Bands (function `score_band`): below log threshold `no_action`, from log to below review `log_only`, from review to below priority `review`, from priority `priority_review`.
+
+## 6. Eval metrics (`data/<scale>/metrics.json`)
+
+Written by `python -m integrity.cli eval --scale <scale>` from `backend/src/integrity/eval/score.py`. Read only by the eval, never by the app.
+
+- `caveat`: synthetic data shows rule coverage, not generalisation.
+- `dataset_hash`: SHA-256 of `manifest.json`; must equal the one in `validation.json`.
+- `ground_truth_sha256`: SHA-256 of `ground_truth/<scale>/ground_truth.csv` and `.json`.
+- `auditor`, one row per issue type, over distinct cases: `found` = flagged cases, `labelled` = anomaly cases, `precision` = hits / found, `recall` = hits / labelled, `f1` = 2 hits / (found + labelled). A ratio with a zero denominator is `null` (undefined), not 1.0.
+- `triage`, one row per latent scenario. Flag counts (`flagged`, `cases`, `dismissed`) count `v_flag` rows. Submission counts classify each latent submission once: `case_opened` if any of its flags opened a case, else `dismissed` if it has a flag, else `not_flagged`. `expected_outcome` is what the rule should do: `clean` not_flagged; `legitimate_quote` and `shared_template` dismissed (auto-cleared); `false_positive` and `genuine_copy` case_opened (a human clears a false positive, so opening a case is correct). `expected` = submissions with the label; `hits` = outcome equals `expected_outcome`; `misses` = expected - hits; `not_flagged` = no flag at all; `hit_rate` = hits / expected (`null` if none).

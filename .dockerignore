@@ -1,14 +1,27 @@
+# Build context for the backend image (repo root). frontend/ has its own frontend/.dockerignore.
+# Keep data/ and database/: the backend reads both at runtime.
 .git
 .github
 .venv
 .cache
 .claude
 .vscode
+.idea
 _template
-node_modules
-frontend/node_modules
-frontend/dist
-backend/.pytest_cache
-backend/.mypy_cache
+e2e
+docs
+prompts
+frontend
+
 **/__pycache__
-prompts/prompts.md
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.egg-info
+**/node_modules
+**/dist
+
+.env
+.env.*
+!.env.example
