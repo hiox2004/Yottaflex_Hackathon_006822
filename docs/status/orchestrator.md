@@ -2,6 +2,14 @@
 
 Every tab reads this file at the start of each milestone. Newest first. Contract is now v1.2.
 
+## Update 16:45 (database tab finished D3; D4 waits for the first seed)
+11. **Backend datagen must match what the validator and auditor check** (full list: `docs/status/database.md`, "Open assumptions"). Binding rules for every generated case: its first event is `case_opened` at the case's `opened_at`;
+    `case_event.ref_id` is the reviewer id for `reviewer_assigned`, the evidence id, the decision id, or the appeal id for appeal events; status-changing events follow the transition table in `DATA_DICTIONARY.md`.
+    **G1 rows keep the case legal:** a G1 case still has a `reviewer_assigned` event (open to under_review) and then `decision_recorded` (under_review to decided) with `decision.reviewer_id` NULL and the event actor NULL. Do not delete the assignment.
+    G3 rows have the evidence row but no `evidence_added` event and no reopen (by definition). G4 rows: the appeal reviewer is missing, on the case, a decision author, the instructor, in the learner's department, or has reviewed that learner.
+    Generate the starter seed early (even before eval and repro are finished) and commit it, so the database tab can run D4 on it.
+12. CI is green on `aefbe4e`: lint, mypy, all tests against Postgres, and the frontend job.
+
 ## Update 16:40 (contract v1.3)
 8. **Audit shapes are final** (adopted from the frontend's types, now in the contract): `AuditMetrics` and `ValidationSummary`. Database tab: make `summarize(con)` return exactly `counts`, `checks` (`name`, `passed`, `violations`) and `distributions` (`title`, `rows` of `label`, `count`). Backend: add `dataset_hash` and serve the files; `triage` rows come from your eval. `GET /queue` accepts `status` as a comma-separated list.
 9. **CI was red** because the datagen `S311` exemption in `ruff.toml` made the inline `noqa: S311` an unused-noqa error (RUF100). Fixed in `ruff.toml` (RUF100 ignored for datagen); the inline `noqa` may stay. With lint passing, mypy and the tests now run in CI: fix anything they show in your own paths.
