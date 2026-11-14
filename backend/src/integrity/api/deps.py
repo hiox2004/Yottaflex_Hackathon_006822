@@ -12,8 +12,8 @@ from integrity.services.common import Connection, load_actor
 
 
 def get_con() -> Iterator[Connection]:
-    """One connection per request; committed on success, rolled back on error."""
-    with db.connect(dict_rows=True) as con:
+    """One connection per request. Autocommit: each write service opens its own transaction."""
+    with db.connect(dict_rows=True, autocommit=True) as con:
         yield con
 
 

@@ -1,0 +1,194 @@
+{
+  "checks": [
+    {
+      "description": "every submission has exactly one similarity report (1:1)",
+      "name": "report_per_submission",
+      "violations": 0
+    },
+    {
+      "description": "the report's rule was in force when the submission was made",
+      "name": "rule_in_force",
+      "violations": 0
+    },
+    {
+      "description": "rule versions have disjoint effective periods",
+      "name": "rules_do_not_overlap",
+      "violations": 0
+    },
+    {
+      "description": "a case exists exactly for flags whose adjusted band is review or priority_review",
+      "name": "triage_reconciliation",
+      "violations": 0
+    },
+    {
+      "description": "an assessment's instructor has the instructor role",
+      "name": "assessment_instructor_role",
+      "violations": 0
+    },
+    {
+      "description": "evidence (001..), decision (01..) and appeal (-01) suffixes are contiguous per case",
+      "name": "id_sequences",
+      "violations": 0
+    },
+    {
+      "description": "submitted <= generated <= opened <= decided <= filed <= appeal decided <= closed",
+      "name": "date_order",
+      "violations": 0
+    },
+    {
+      "description": "each case has exactly one case_opened event at its opened_at",
+      "name": "case_opened_event",
+      "violations": 0
+    },
+    {
+      "description": "every event's (type, from, to) is a legal lifecycle transition",
+      "name": "transition_pairs",
+      "violations": 0
+    },
+    {
+      "description": "each status-changing event starts from the status the previous one reached",
+      "name": "transition_chain",
+      "violations": 0
+    },
+    {
+      "description": "event ref_id points at the reviewer, evidence, decision or appeal the event is about",
+      "name": "event_references",
+      "violations": 0
+    },
+    {
+      "description": "the derived status is backed by rows (reviewers, decision, appeal, appeal outcome)",
+      "name": "status_matches_rows",
+      "violations": 0
+    },
+    {
+      "description": "a decision cites only evidence of its own case, added no later than the decision",
+      "name": "cited_evidence_same_case",
+      "violations": 0
+    },
+    {
+      "description": "an appeal targets a decision of its own case",
+      "name": "appeal_decision_same_case",
+      "violations": 0
+    },
+    {
+      "description": "no case holds the same evidence (kind and description) twice",
+      "name": "duplicate_evidence",
+      "violations": 0
+    }
+  ],
+  "counts": {
+    "appeal": 45,
+    "assessment": 151,
+    "case_event": 1594,
+    "case_reviewer": 294,
+    "decision": 147,
+    "decision_evidence": 317,
+    "evidence_item": 676,
+    "flags": 1000,
+    "integrity_case": 300,
+    "integrity_rule": 2,
+    "learner": 2000,
+    "reviewer": 64,
+    "similarity_report": 10000,
+    "submission": 10000
+  },
+  "dataset_hash": "e9e32cfcce4a42f0536c184eed7e7e87607d9c22180b6ee168b1e0d1c3f8bf59",
+  "distributions": {
+    "adjusted_score_by_tenth": {
+      "0.0": 4981,
+      "0.1": 3001,
+      "0.2": 1058,
+      "0.3": 290,
+      "0.4": 185,
+      "0.5": 185,
+      "0.6": 126,
+      "0.7": 95,
+      "0.8": 55,
+      "0.9": 24
+    },
+    "appeals_by_outcome": {
+      "overturned": 4,
+      "partially_upheld": 6,
+      "pending": 18,
+      "upheld": 17
+    },
+    "boundary_adjusted_scores": {
+      "0.299": 5,
+      "0.300": 4,
+      "0.599": 5,
+      "0.600": 4,
+      "0.799": 2,
+      "0.800": 3
+    },
+    "cases_by_band": {
+      "priority_review": 66,
+      "review": 234
+    },
+    "cases_by_status": {
+      "appeal_decided": 9,
+      "appeal_review": 9,
+      "appealed": 9,
+      "closed": 69,
+      "decided": 43,
+      "open": 69,
+      "under_review": 92
+    },
+    "decisions_by_outcome": {
+      "inconclusive": 10,
+      "no_violation": 26,
+      "violation_confirmed": 111
+    },
+    "effective_outcomes": {
+      "inconclusive": 16,
+      "no_violation": 30,
+      "undecided": 153,
+      "violation_confirmed": 101
+    },
+    "evidence_per_case": {
+      "1": 19,
+      "2": 188,
+      "3": 91,
+      "4": 2
+    },
+    "flag_outcomes": {
+      "case_opened": 300,
+      "dismissed (quote_only)": 375,
+      "dismissed (template_match)": 325
+    },
+    "flags_by_band": {
+      "log_only": 450,
+      "no_action": 250,
+      "priority_review": 66,
+      "review": 234
+    },
+    "raw_score_by_tenth": {
+      "0.0": 4301,
+      "0.1": 2975,
+      "0.2": 1284,
+      "0.3": 350,
+      "0.4": 66,
+      "0.5": 24,
+      "0.6": 306,
+      "0.7": 292,
+      "0.8": 265,
+      "0.9": 136,
+      "1.0": 1
+    },
+    "reports_by_rule": {
+      "INT-2026-000001": 5588,
+      "INT-2026-000002": 4412
+    },
+    "reviewers_per_case": {
+      "0": 69,
+      "1": 168,
+      "2": 63
+    },
+    "staff_by_role": {
+      "academic_administrator": 6,
+      "academic_reviewer": 24,
+      "instructor": 24,
+      "support_staff": 10
+    }
+  },
+  "violations": 0
+}

@@ -1,6 +1,7 @@
 """Read use cases: lists, the case detail with its checks and explanation, the timeline."""
 
 from datetime import datetime
+from typing import Any
 
 from integrity.errors import NotFoundError
 from integrity.models import Reviewer, Rule, Status
@@ -44,12 +45,12 @@ def list_rules(con: Connection) -> list[Rule]:
     return [Rule.model_validate(r) for r in reviewers.list_rules(con)]
 
 
-def _matches(row: dict[str, object], needs: bool, wanted: QueueFilter) -> bool:
+def _matches(row: dict[str, Any], needs: bool, wanted: QueueFilter) -> bool:
     assignees = row["assignee_ids"]
     return (
-        (wanted.status is None or row["status"] == wanted.status)
+        (not wanted.status or row["status"] in wanted.statuses())
         and (wanted.band is None or row["band"] == wanted.band)
-        and (wanted.assigned_to is None or wanted.assigned_to in assignees)  # type: ignore[operator]
+        and (wanted.assigned_to is None or wanted.assigned_to in assignees)
         and (needs or not wanted.needs_my_action)
     )
 
@@ -142,8 +143,6 @@ def eligible_reviewers(con: Connection, case_id: str, purpose: str) -> list[Elig
     for row, facts in reviewer_candidates(con, case_id):
         reasons = judge(facts)
         result.append(
-            EligibleReviewer(
-                **Reviewer.model_validate(row).model_dump(), eligible=not reasons, reasons=reasons
-            )
+            EligibleReviewer.model_validate({**row, "eligible": not reasons, "reasons": reasons})
         )
     return result

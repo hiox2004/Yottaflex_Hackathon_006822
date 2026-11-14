@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from integrity import db
 from integrity.api.app import create_app
 from integrity.api.deps import get_clock, get_con
+from integrity.api.routers.audit import get_data_dir
 from integrity.clock import FixedClock
 from integrity.config import REPO_ROOT
 from integrity.dbload import SCHEMA
@@ -60,8 +61,14 @@ def api() -> Iterator[Api]:
         con.execute("CREATE SCHEMA scratch; SET LOCAL search_path TO scratch")
         con.execute(SCHEMA.read_text(encoding="utf-8"))
         con.execute(SEED.read_text(encoding="utf-8"))
+        # The seed gives explicit event ids: move the sequence past them, as the loader does.
+        con.execute(
+            "SELECT setval(pg_get_serial_sequence('case_event', 'case_event_id'),"
+            " (SELECT max(case_event_id) FROM case_event))"
+        )
         app = create_app()
         app.dependency_overrides[get_con] = lambda: con
         app.dependency_overrides[get_clock] = lambda: FixedClock(NOW)
+        app.dependency_overrides[get_data_dir] = lambda: SEED.parent
         yield Api(TestClient(app), con)
         con.rollback()

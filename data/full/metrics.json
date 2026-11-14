@@ -1,0 +1,65 @@
+{
+  "auditor": [
+    {
+      "f1": 1.0,
+      "issue_type": "AUTO_GUILT_WITHOUT_REVIEW",
+      "labelled": 8,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "f1": 1.0,
+      "issue_type": "REVIEWER_CONFLICT",
+      "labelled": 10,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "f1": 1.0,
+      "issue_type": "EVIDENCE_AFTER_DECISION_NO_HISTORY",
+      "labelled": 8,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "f1": 1.0,
+      "issue_type": "APPEAL_CLOSED_NO_INDEPENDENT_REVIEW",
+      "labelled": 6,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  ],
+  "dataset_hash": "e9e32cfcce4a42f0536c184eed7e7e87607d9c22180b6ee168b1e0d1c3f8bf59",
+  "triage": [
+    {
+      "cases": 0,
+      "dismissed": 0,
+      "flagged": 0,
+      "scenario": "clean"
+    },
+    {
+      "cases": 0,
+      "dismissed": 360,
+      "flagged": 360,
+      "scenario": "legitimate_quote"
+    },
+    {
+      "cases": 0,
+      "dismissed": 310,
+      "flagged": 310,
+      "scenario": "shared_template"
+    },
+    {
+      "cases": 90,
+      "dismissed": 0,
+      "flagged": 90,
+      "scenario": "false_positive"
+    },
+    {
+      "cases": 210,
+      "dismissed": 30,
+      "flagged": 240,
+      "scenario": "genuine_copy"
+    }
+  ]
+}

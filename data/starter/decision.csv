@@ -1,16 +1,16 @@
 decision_id,case_id,reviewer_id,outcome,rationale,decided_at
-DEC-CAS-2026-000002-01,CAS-2026-000002,REV-000040,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-01-27T21:13:00Z
-DEC-CAS-2026-000003-01,CAS-2026-000003,REV-000050,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-01-30T17:36:00Z
-DEC-CAS-2026-000006-01,CAS-2026-000006,REV-000059,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-01-29T09:54:00Z
-DEC-CAS-2026-000008-01,CAS-2026-000008,REV-000037,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-01-29T22:25:00Z
-DEC-CAS-2026-000009-01,CAS-2026-000009,REV-000053,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-02-09T20:31:00Z
+DEC-CAS-2026-000002-01,CAS-2026-000002,REV-000040,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-01-27T21:13:00Z
+DEC-CAS-2026-000003-01,CAS-2026-000003,REV-000050,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-01-30T17:36:00Z
+DEC-CAS-2026-000006-01,CAS-2026-000006,REV-000059,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-01-29T09:54:00Z
+DEC-CAS-2026-000008-01,CAS-2026-000008,REV-000037,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-01-29T22:25:00Z
+DEC-CAS-2026-000009-01,CAS-2026-000009,REV-000053,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-02-09T20:31:00Z
 DEC-CAS-2026-000012-01,CAS-2026-000012,REV-000042,no_violation,"The overlap is explained by cited or templated text, or by common phrasing.",2026-02-06T06:13:00Z
-DEC-CAS-2026-000013-01,CAS-2026-000013,REV-000028,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-02-11T03:11:00Z
+DEC-CAS-2026-000013-01,CAS-2026-000013,REV-000028,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-02-11T03:11:00Z
 DEC-CAS-2026-000015-01,CAS-2026-000015,REV-000059,no_violation,"The overlap is explained by cited or templated text, or by common phrasing.",2026-02-14T04:41:00Z
-DEC-CAS-2026-000017-01,CAS-2026-000017,REV-000037,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-03-14T00:30:00Z
-DEC-CAS-2026-000018-01,CAS-2026-000018,REV-000038,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-03-19T15:55:00Z
-DEC-CAS-2026-000021-01,CAS-2026-000021,REV-000045,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-05-07T16:01:00Z
-DEC-CAS-2026-000024-01,CAS-2026-000024,REV-000051,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-05-08T14:40:00Z
-DEC-CAS-2026-000026-01,CAS-2026-000026,REV-000026,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-08-16T23:20:00Z
-DEC-CAS-2026-000028-01,CAS-2026-000028,,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-08-17T21:48:00Z
-DEC-CAS-2026-000030-01,CAS-2026-000030,REV-000050,violation_confirmed,The matched text is not explained by quotation or the template and traces to a source.,2026-08-21T11:39:00Z
+DEC-CAS-2026-000017-01,CAS-2026-000017,REV-000037,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-03-14T00:30:00Z
+DEC-CAS-2026-000018-01,CAS-2026-000018,REV-000038,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-03-19T15:55:00Z
+DEC-CAS-2026-000021-01,CAS-2026-000021,REV-000045,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-05-07T16:01:00Z
+DEC-CAS-2026-000024-01,CAS-2026-000024,REV-000051,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-05-08T14:40:00Z
+DEC-CAS-2026-000026-01,CAS-2026-000026,REV-000026,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-08-16T23:20:00Z
+DEC-CAS-2026-000028-01,CAS-2026-000028,,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-08-17T21:48:00Z
+DEC-CAS-2026-000030-01,CAS-2026-000030,REV-000050,violation_confirmed,The match is not explained by quotes or the template and has a source.,2026-08-21T11:39:00Z

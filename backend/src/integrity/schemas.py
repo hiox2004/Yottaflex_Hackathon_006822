@@ -1,6 +1,8 @@
 """Response shapes of the API contract (v1.2) that are not shared with the rules."""
 
-from pydantic import BaseModel, Field
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, Field, StringConstraints, field_validator
 
 from integrity.models import (
     Action,
@@ -111,12 +113,23 @@ class QueueRow(BaseModel):
 class QueueFilter(BaseModel):
     """Query parameters of GET /queue."""
 
-    status: Status | None = None
+    status: str | None = None  # one status or a comma-separated list
     band: Band | None = None
     assigned_to: str | None = None
     needs_my_action: bool = False
     limit: int = Field(default=50, ge=1, le=200)
     offset: int = Field(default=0, ge=0)
+
+    @field_validator("status")
+    @classmethod
+    def _known_statuses(cls, value: str | None) -> str | None:
+        if value is not None:
+            for name in value.split(","):
+                Status(name)
+        return value
+
+    def statuses(self) -> set[str]:
+        return set(self.status.split(",")) if self.status else set()
 
 
 class QueueCounts(BaseModel):
@@ -177,3 +190,39 @@ class FindingOut(BaseModel):
 class AuditFindings(BaseModel):
     counts: dict[str, int]
     findings: list[FindingOut]
+
+
+Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
+
+
+class AssignReviewerBody(BaseModel):
+    reviewer_id: str
+    role_in_case: Literal["primary", "secondary"]
+
+
+class EvidenceBody(BaseModel):
+    kind: EvidenceKind
+    description: Text
+
+
+class ReopenBody(BaseModel):
+    reason: Text
+
+
+class DecisionBody(BaseModel):
+    outcome: DecisionOutcome
+    rationale: Text
+    cited_evidence_ids: list[str]
+
+
+class AppealBody(BaseModel):
+    grounds: Text
+
+
+class AppealReviewerBody(BaseModel):
+    reviewer_id: str
+
+
+class AppealOutcomeBody(BaseModel):
+    outcome: AppealOutcome
+    rationale: Text
