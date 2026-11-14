@@ -1,7 +1,11 @@
 """Schema smoke test: loads, derived values, id formats, append-only history, views."""
 
+import re
+
 import psycopg
 import pytest
+
+from integrity.config import REPO_ROOT
 
 
 def fails(con: psycopg.Connection, sql: str, error: type[psycopg.Error]) -> None:
@@ -76,3 +80,26 @@ def test_dismissed_flag_gets_the_larger_exclusion_as_reason(con: psycopg.Connect
         "SELECT band, outcome, dismissal_reason FROM v_flag WHERE submission_id = 'SUB-2026-000002'"
     )
     assert row.fetchone() == ("no_action", "dismissed", "template_match")
+
+
+def test_dictionary_lists_every_column_of_every_table(con: psycopg.Connection) -> None:
+    text = (REPO_ROOT / "docs" / "DATA_DICTIONARY.md").read_text(encoding="utf-8")
+    documented: dict[str, set[str]] = {}
+    table = ""
+    for line in text.splitlines():
+        if line.startswith("### "):
+            table = line[4:].strip()
+        elif line.startswith("## "):
+            table = ""
+        elif table and (cell := re.match(r"\| `(\w+)` \|", line)):
+            documented.setdefault(table, set()).add(cell.group(1))
+    schema = con.execute(
+        "SELECT table_name, column_name FROM information_schema.columns c "
+        "WHERE table_schema = 'scratch' AND table_name IN "
+        "(SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' "
+        "AND table_schema = 'scratch') ORDER BY 1, 2"
+    ).fetchall()
+    actual: dict[str, set[str]] = {}
+    for table_name, column in schema:
+        actual.setdefault(table_name, set()).add(column)
+    assert documented == actual
