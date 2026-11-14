@@ -1,6 +1,6 @@
 """Band boundaries, triage reasons and the explanation steps."""
 
-from datetime import date
+from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
@@ -15,7 +15,7 @@ RULE = Rule(
     review_threshold=Decimal("0.60"),
     priority_threshold=Decimal("0.80"),
     appeal_window_days=14,
-    effective_from=date(2026, 1, 1),
+    effective_from=datetime(2026, 1, 1, tzinfo=UTC),
     effective_to=None,
 )
 
@@ -60,7 +60,7 @@ def test_adjusted_score_exactly_on_the_gate_still_opens_a_case() -> None:
     [
         ("0.300", "0.100", DismissalReason.QUOTE_ONLY),
         ("0.100", "0.300", DismissalReason.TEMPLATE_MATCH),
-        ("0.200", "0.200", DismissalReason.TEMPLATE_MATCH),
+        ("0.200", "0.200", DismissalReason.QUOTE_ONLY),
     ],
 )
 def test_dismissal_reason_is_the_larger_exclusion(

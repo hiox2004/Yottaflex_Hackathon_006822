@@ -1,19 +1,21 @@
 # Backend tab status
 
-Updated: M1 done (14 Nov 2026) · Next: M2 17:20 (M3 18:10, M4 18:45 freeze)
+Updated: M2 done (14 Nov 2026) · Next: M3 18:10, M4 18:45 freeze
 
 ## Done
-- M1: `ids`, `models` (contract enums and shapes), `clock`, `errors`, pure `rules/` (`triage`, `explain_triage`, `conflicts`, `lifecycle` with `TRANSITIONS`, `check_action`, `action_checks`, `allowed_actions`, guards), CLI skeleton, 35 unit tests (boundaries 0.299..0.800, triage reasons, conflicts, independence, transitions). Draft datagen/rules removed (old schema).
-- Decisions: dismissal tie (quoted == template) gives `template_match`; check order is role, then state, then specifics; no deadline for filing an appeal (limit); close from `decided` needs the window elapsed.
+- M1: ids, models, pure rules (`explain_triage`, `action_checks`, guards), unit tests. Orchestrator decisions 2 and 3 applied (tie = `quote_only`; `ROLE_CANNOT_REVIEW` gives 422 `VALIDATION_ERROR`).
+- M2: datagen (quota-driven kinds, boundary pins, G1-G4 plus decoys) with hash-stable export and `repro`. Starter 1,000/100/30 and full 10,000/1,000/300 load; validator 0 violations; auditor finds exactly 4 (starter) and 8/10/8/6 (full). `repro` identical across `PYTHONHASHSEED` values.
+- Read endpoints with v1.2 fields (counts, `needs_my_action` filter), error envelope, actor stub, one log line per request. API tests run the starter data in a rolled-back scratch schema.
+- Schema facts accepted: `assessment.kind` values and the `effective_outcome` mapping.
 
 ## Next
-- M2: datagen starter + hash-stable export + `repro`; `load --scale starter`; read endpoints with v1.1 fields.
+- M3: write endpoints and guards, G1-G4 API tests, full-scale eval, `simplify`, `security-review`, proposed `/audit/*` shapes.
 
 ## Blocked / needs from another tab
-- `schema.sql` D1 (still the old draft). `cli validate|audit` import `integrity.validation.run_checks` and `integrity.auditor.audit` (agreed interface); mypy flags both until the database tab exports them from the package `__init__`.
+- none
 
 ## Contract change requests
-- `/eligible-reviewers`: non-reviewer roles (support staff, administrators) cannot decide, so assigning them strands a case. Proposal: reject them with 422 `VALIDATION_ERROR` on assignment and list them `eligible: false`; the reason code is not a `ConflictCode`. Default until answered: 422 on assignment, listed ineligible.
+- none. Note: `GET /reviewers` works without `X-Actor-Id` (the UI needs it to pick an actor); every other endpoint except `/health` requires it.
 
 ## Proposed shapes (by M3): `/audit/metrics`, `/audit/validation`
 - not yet

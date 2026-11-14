@@ -38,18 +38,31 @@ def _audit(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _datagen(args: argparse.Namespace) -> int:
+    from integrity.datagen.paths import generate_to_default_dirs
+
+    sys.stdout.write(f"{generate_to_default_dirs(args.scale)}\n")
+    return 0
+
+
+def _repro(args: argparse.Namespace) -> int:
+    from integrity.datagen.paths import reproduce
+
+    return reproduce(args.scale)
+
+
 def _not_built(args: argparse.Namespace) -> int:
     sys.stderr.write(f"{args.command}: not built yet\n")
     return 2
 
 
 _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
-    "datagen": _not_built,
+    "datagen": _datagen,
     "load": _load,
     "validate": _validate,
     "audit": _audit,
     "eval": _not_built,
-    "repro": _not_built,
+    "repro": _repro,
 }
 _NEEDS_SCALE = ("datagen", "load", "eval", "repro")
 

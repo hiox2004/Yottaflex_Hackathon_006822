@@ -16,6 +16,7 @@ from integrity.rules import (
     allowed_actions,
     conflict_reasons,
     guard,
+    guard_assignment,
     guard_cited_evidence,
     is_independent,
 )
@@ -42,6 +43,7 @@ def facts(status: Status, **changes: object) -> CaseFacts:
 def conflict(**changes: object) -> ConflictFacts:
     base = ConflictFacts(
         reviewer_id="REV-000009",
+        reviewer_role=Role.ACADEMIC_REVIEWER,
         reviewer_department="Physics",
         learner_department="Law",
         assessment_instructor_id="REV-000004",
@@ -63,6 +65,7 @@ def test_conflict_free_reviewer_has_no_reasons() -> None:
         ({"reviewer_department": "Law"}, "SAME_DEPARTMENT"),
         ({"reviewed_learner_before": True}, "REVIEWED_LEARNER_BEFORE"),
         ({"on_case": True}, "ALREADY_ON_CASE"),
+        ({"reviewer_role": Role.SUPPORT_STAFF}, "ROLE_CANNOT_REVIEW"),
     ],
 )
 def test_each_conflict_has_its_code(change: dict[str, object], code: str) -> None:
@@ -138,3 +141,11 @@ def test_decision_must_cite_evidence_of_this_case() -> None:
     for cited in ([], ["EVD-9"]):
         with pytest.raises(RuleViolation):
             guard_cited_evidence(cited, ["EVD-1"])
+
+
+def test_role_that_cannot_review_is_a_validation_error_not_a_conflict() -> None:
+    reasons = conflict_reasons(conflict(reviewer_role=Role.ACADEMIC_ADMINISTRATOR))
+    with pytest.raises(RuleViolation) as raised:
+        guard_assignment(reasons, "REV-000009", "CONFLICT_OF_INTEREST")
+    assert raised.value.code == "VALIDATION_ERROR"
+    assert "ROLE_CANNOT_REVIEW" in raised.value.details["reasons"]

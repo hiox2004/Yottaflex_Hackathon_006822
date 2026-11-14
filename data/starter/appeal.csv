@@ -1,0 +1,6 @@
+appeal_id,case_id,decision_id,grounds,filed_at,filed_by,reviewer_id,outcome,outcome_rationale,decided_at
+APL-CAS-2026-000002-01,CAS-2026-000002,DEC-CAS-2026-000002-01,The learner believes the quoted passages were cited correctly.,2026-02-03T17:04:00Z,REV-000014,REV-000045,overturned,"The learner's statement explains the overlap, so the finding is withdrawn.",2026-02-11T10:11:00Z
+APL-CAS-2026-000009-01,CAS-2026-000009,DEC-CAS-2026-000009-01,The learner disputes that the matched source was available to them.,2026-02-15T05:55:00Z,REV-000012,REV-000053,upheld,No new evidence changes the original finding.,2026-02-28T03:59:00Z
+APL-CAS-2026-000013-01,CAS-2026-000013,DEC-CAS-2026-000013-01,The overlapping text is common phrasing in this field.,2026-02-20T18:29:00Z,REV-000010,REV-000024,,,
+APL-CAS-2026-000017-01,CAS-2026-000017,DEC-CAS-2026-000017-01,The learner disputes that the matched source was available to them.,2026-03-16T22:47:00Z,REV-000013,REV-000029,upheld,No new evidence changes the original finding.,2026-03-27T16:30:00Z
+APL-CAS-2026-000026-01,CAS-2026-000026,DEC-CAS-2026-000026-01,The learner believes the quoted passages were cited correctly.,2026-08-24T20:06:00Z,REV-000009,,,,

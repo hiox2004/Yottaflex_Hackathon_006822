@@ -13,14 +13,15 @@ from integrity.errors import RuleViolation
 from integrity.models import (
     Action,
     ActionCheck,
+    ConflictCode,
     DecisionOutcome,
     EvidenceKind,
     Reason,
     Role,
     Status,
 )
+from integrity.rules.conflicts import REVIEWER_ROLES
 
-REVIEWER_ROLES = frozenset({Role.INSTRUCTOR, Role.ACADEMIC_REVIEWER})
 ADMIN = Role.ACADEMIC_ADMINISTRATOR
 SUPPORT = Role.SUPPORT_STAFF
 
@@ -183,7 +184,13 @@ def guard_cited_evidence(cited: Collection[str], case_evidence_ids: Collection[s
 
 
 def guard_assignment(reasons: list[Reason], reviewer_id: str, code: str) -> None:
-    """Raise `code` (CONFLICT_OF_INTEREST or NOT_INDEPENDENT) if any reason counts against."""
+    """Raise `code` (CONFLICT_OF_INTEREST or NOT_INDEPENDENT) if any reason counts against.
+
+    A candidate whose role cannot review at all is a bad request (VALIDATION_ERROR), not a conflict.
+    """
     if reasons:
-        details = {"reviewer_id": reviewer_id, "reasons": [r.code for r in reasons]}
+        codes = [r.code for r in reasons]
+        if ConflictCode.ROLE_CANNOT_REVIEW in codes:
+            code = "VALIDATION_ERROR"
+        details = {"reviewer_id": reviewer_id, "reasons": codes}
         raise RuleViolation(code, reasons[0].message, details)

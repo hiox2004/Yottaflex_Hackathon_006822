@@ -1,0 +1,65 @@
+reviewer_id,name,role,department
+REV-000001,Vik Silva,academic_administrator,Biology
+REV-000002,Ben Ito,academic_administrator,Computer Science
+REV-000003,Sam Rossi,academic_administrator,Economics
+REV-000004,Nia Muller,academic_administrator,Engineering
+REV-000005,Uma Gupta,academic_administrator,History
+REV-000006,Kofi Okafor,academic_administrator,Law
+REV-000007,Sam Gupta,support_staff,Biology
+REV-000008,Fatima Rossi,support_staff,Computer Science
+REV-000009,Wen Rossi,support_staff,Economics
+REV-000010,Jia Lopez,support_staff,Engineering
+REV-000011,Gus Brandt,support_staff,History
+REV-000012,Uma Dubois,support_staff,Law
+REV-000013,Priya Petrov,support_staff,Physics
+REV-000014,Ben Evans,support_staff,Psychology
+REV-000015,Chen Petrov,support_staff,Biology
+REV-000016,Uma Muller,support_staff,Computer Science
+REV-000017,Omar Muller,instructor,Biology
+REV-000018,Ben Novak,instructor,Biology
+REV-000019,Rosa Quist,instructor,Biology
+REV-000020,Ben Petrov,instructor,Computer Science
+REV-000021,Ivan Dubois,instructor,Computer Science
+REV-000022,Hana Jensen,instructor,Computer Science
+REV-000023,Ana Tanaka,instructor,Economics
+REV-000024,Fatima Quist,instructor,Economics
+REV-000025,Jia Haddad,instructor,Economics
+REV-000026,Quinn Abara,instructor,Engineering
+REV-000027,Omar Jensen,instructor,Engineering
+REV-000028,Mateo Haddad,instructor,Engineering
+REV-000029,Nia Fischer,instructor,History
+REV-000030,Rosa Gupta,instructor,History
+REV-000031,Fatima Brandt,instructor,History
+REV-000032,Yusuf Novak,instructor,Law
+REV-000033,Quinn Petrov,instructor,Law
+REV-000034,Mateo Quist,instructor,Law
+REV-000035,Wen Lopez,instructor,Physics
+REV-000036,Sam Muller,instructor,Physics
+REV-000037,Priya Tanaka,instructor,Physics
+REV-000038,Ben Castillo,instructor,Psychology
+REV-000039,Eli Okafor,instructor,Psychology
+REV-000040,Tara Okafor,instructor,Psychology
+REV-000041,Ana Jensen,academic_reviewer,Biology
+REV-000042,Uma Petrov,academic_reviewer,Biology
+REV-000043,Ana Abara,academic_reviewer,Biology
+REV-000044,Sam Haddad,academic_reviewer,Computer Science
+REV-000045,Wen Fischer,academic_reviewer,Computer Science
+REV-000046,Vik Ito,academic_reviewer,Computer Science
+REV-000047,Lena Rossi,academic_reviewer,Economics
+REV-000048,Tara Abara,academic_reviewer,Economics
+REV-000049,Tara Abara,academic_reviewer,Economics
+REV-000050,Hana Abara,academic_reviewer,Engineering
+REV-000051,Eli Castillo,academic_reviewer,Engineering
+REV-000052,Ivan Haddad,academic_reviewer,Engineering
+REV-000053,Rosa Brandt,academic_reviewer,History
+REV-000054,Eli Silva,academic_reviewer,History
+REV-000055,Lena Evans,academic_reviewer,History
+REV-000056,Kofi Evans,academic_reviewer,Law
+REV-000057,Mateo Haddad,academic_reviewer,Law
+REV-000058,Sam Fischer,academic_reviewer,Law
+REV-000059,Eli Silva,academic_reviewer,Physics
+REV-000060,Yusuf Quist,academic_reviewer,Physics
+REV-000061,Chen Tanaka,academic_reviewer,Physics
+REV-000062,Ivan Castillo,academic_reviewer,Psychology
+REV-000063,Tara Lopez,academic_reviewer,Psychology
+REV-000064,Nia Brandt,academic_reviewer,Psychology

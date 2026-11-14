@@ -13,6 +13,9 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://integrity:integrity_dev@localhost:5433/integrity"
 
+    data_scale: str = "full"  # which data/<scale>/ folder the audit endpoints read
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+
     # Optional AI layer. Off by default: the core must never depend on it.
     ai_enabled: bool = False
     llm_base_url: str = "http://localhost:11434/v1"

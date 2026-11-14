@@ -45,8 +45,8 @@ def _is_review_band(band: Band) -> bool:
 
 
 def dismissal_reason(scores: Scores) -> DismissalReason:
-    """The larger exclusion explains a dismissal; on a tie the shared template wins."""
-    if scores.quoted > scores.template:
+    """The larger exclusion explains a dismissal; on a tie it is quote_only (as in v_flag)."""
+    if scores.quoted >= scores.template:
         return DismissalReason.QUOTE_ONLY
     return DismissalReason.TEMPLATE_MATCH
 

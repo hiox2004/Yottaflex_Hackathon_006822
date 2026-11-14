@@ -2,7 +2,9 @@
 
 from dataclasses import dataclass
 
-from integrity.models import ConflictCode, Reason
+from integrity.models import ConflictCode, Reason, Role
+
+REVIEWER_ROLES = frozenset({Role.INSTRUCTOR, Role.ACADEMIC_REVIEWER})
 
 
 @dataclass(frozen=True)
@@ -10,6 +12,7 @@ class ConflictFacts:
     """What is known about one candidate reviewer in relation to one case."""
 
     reviewer_id: str
+    reviewer_role: Role
     reviewer_department: str
     learner_department: str
     assessment_instructor_id: str
@@ -22,6 +25,10 @@ def conflict_reasons(facts: ConflictFacts) -> list[Reason]:
     """Why this person cannot be assigned to review the case (empty when conflict-free)."""
     who = facts.reviewer_id
     reasons: list[Reason] = []
+    if facts.reviewer_role not in REVIEWER_ROLES:
+        reasons.append(
+            Reason(code=ConflictCode.ROLE_CANNOT_REVIEW, message=f"{who} cannot review cases.")
+        )
     if facts.assessment_instructor_id == who:
         reasons.append(
             Reason(

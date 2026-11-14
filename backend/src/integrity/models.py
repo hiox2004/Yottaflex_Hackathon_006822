@@ -1,6 +1,6 @@
 """Enums and Pydantic models of the API contract (v1.1), shared by every layer."""
 
-from datetime import date
+from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 from typing import Annotated
@@ -9,6 +9,13 @@ from pydantic import BaseModel, PlainSerializer
 
 # Scores are exact Decimals inside the code and JSON numbers with three decimals on the wire.
 Score = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
+
+
+def _iso(moment: datetime) -> str:
+    return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+UtcTime = Annotated[datetime, PlainSerializer(_iso, return_type=str, when_used="json")]
 
 
 class Role(StrEnum):
@@ -96,6 +103,7 @@ class ConflictCode(StrEnum):
     REVIEWED_LEARNER_BEFORE = "REVIEWED_LEARNER_BEFORE"
     ALREADY_ON_CASE = "ALREADY_ON_CASE"
     DECIDED_THIS_CASE = "DECIDED_THIS_CASE"
+    ROLE_CANNOT_REVIEW = "ROLE_CANNOT_REVIEW"
 
 
 class Rule(BaseModel):
@@ -107,8 +115,8 @@ class Rule(BaseModel):
     review_threshold: Score
     priority_threshold: Score
     appeal_window_days: int
-    effective_from: date
-    effective_to: date | None
+    effective_from: UtcTime
+    effective_to: UtcTime | None
 
 
 class Reviewer(BaseModel):

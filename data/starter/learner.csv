@@ -1,0 +1,201 @@
+learner_id,name,department,cohort_year
+LRN-000001,Ben Dubois,History,2025
+LRN-000002,Dara Lopez,Psychology,2025
+LRN-000003,Ivan Quist,Biology,2026
+LRN-000004,Ana Ito,Biology,2026
+LRN-000005,Jia Brandt,History,2024
+LRN-000006,Vik Ito,Biology,2025
+LRN-000007,Uma Tanaka,Engineering,2025
+LRN-000008,Yusuf Okafor,Biology,2025
+LRN-000009,Priya Jensen,Psychology,2025
+LRN-000010,Nia Fischer,Law,2023
+LRN-000011,Kofi Lopez,History,2025
+LRN-000012,Mateo Castillo,Biology,2026
+LRN-000013,Kofi Khan,History,2026
+LRN-000014,Omar Dubois,Computer Science,2025
+LRN-000015,Eli Abara,Computer Science,2026
+LRN-000016,Kofi Haddad,Economics,2023
+LRN-000017,Tara Tanaka,Economics,2026
+LRN-000018,Mateo Fischer,Psychology,2023
+LRN-000019,Omar Evans,Biology,2023
+LRN-000020,Rosa Castillo,Physics,2026
+LRN-000021,Kofi Castillo,History,2024
+LRN-000022,Kofi Khan,Physics,2025
+LRN-000023,Yusuf Haddad,Computer Science,2026
+LRN-000024,Sam Fischer,Computer Science,2023
+LRN-000025,Lena Evans,Engineering,2026
+LRN-000026,Mateo Ito,History,2024
+LRN-000027,Jia Petrov,Engineering,2024
+LRN-000028,Fatima Gupta,Psychology,2025
+LRN-000029,Rosa Brandt,Engineering,2024
+LRN-000030,Tara Okafor,Physics,2026
+LRN-000031,Jia Rossi,Biology,2025
+LRN-000032,Lena Gupta,Computer Science,2025
+LRN-000033,Wen Jensen,Biology,2023
+LRN-000034,Fatima Dubois,Computer Science,2024
+LRN-000035,Ivan Rossi,Law,2025
+LRN-000036,Ivan Rossi,Physics,2025
+LRN-000037,Sam Lopez,History,2026
+LRN-000038,Yusuf Rossi,Computer Science,2026
+LRN-000039,Gus Jensen,Law,2025
+LRN-000040,Kofi Tanaka,Law,2024
+LRN-000041,Yusuf Ito,Physics,2025
+LRN-000042,Hana Petrov,Biology,2026
+LRN-000043,Jia Dubois,Computer Science,2025
+LRN-000044,Priya Khan,Law,2025
+LRN-000045,Dara Haddad,Engineering,2026
+LRN-000046,Hana Abara,Physics,2025
+LRN-000047,Priya Haddad,Physics,2026
+LRN-000048,Chen Rossi,Psychology,2025
+LRN-000049,Mateo Ito,Psychology,2025
+LRN-000050,Rosa Khan,Computer Science,2025
+LRN-000051,Ana Castillo,Engineering,2025
+LRN-000052,Chen Lopez,Computer Science,2025
+LRN-000053,Vik Castillo,Law,2026
+LRN-000054,Chen Evans,Physics,2025
+LRN-000055,Quinn Brandt,Engineering,2025
+LRN-000056,Tara Lopez,History,2026
+LRN-000057,Vik Tanaka,Economics,2023
+LRN-000058,Kofi Tanaka,Psychology,2025
+LRN-000059,Fatima Brandt,Psychology,2023
+LRN-000060,Rosa Lopez,Biology,2026
+LRN-000061,Nia Haddad,History,2025
+LRN-000062,Ben Silva,Biology,2026
+LRN-000063,Omar Haddad,Computer Science,2023
+LRN-000064,Rosa Dubois,Computer Science,2024
+LRN-000065,Mateo Jensen,Law,2025
+LRN-000066,Kofi Dubois,Law,2026
+LRN-000067,Ana Lopez,Law,2024
+LRN-000068,Gus Okafor,Engineering,2025
+LRN-000069,Rosa Muller,Computer Science,2025
+LRN-000070,Jia Dubois,Physics,2023
+LRN-000071,Priya Okafor,Physics,2025
+LRN-000072,Gus Gupta,Engineering,2025
+LRN-000073,Chen Silva,Economics,2025
+LRN-000074,Jia Jensen,Engineering,2026
+LRN-000075,Sam Tanaka,Engineering,2023
+LRN-000076,Eli Rossi,Computer Science,2023
+LRN-000077,Chen Brandt,Law,2024
+LRN-000078,Nia Tanaka,Law,2025
+LRN-000079,Chen Muller,Physics,2026
+LRN-000080,Rosa Lopez,Engineering,2023
+LRN-000081,Uma Evans,Biology,2025
+LRN-000082,Uma Petrov,Physics,2025
+LRN-000083,Kofi Brandt,History,2025
+LRN-000084,Wen Okafor,History,2025
+LRN-000085,Lena Okafor,Psychology,2026
+LRN-000086,Jia Ito,Psychology,2024
+LRN-000087,Yusuf Gupta,Economics,2025
+LRN-000088,Vik Petrov,History,2025
+LRN-000089,Nia Castillo,Physics,2026
+LRN-000090,Omar Brandt,Computer Science,2026
+LRN-000091,Omar Rossi,Physics,2024
+LRN-000092,Mateo Fischer,Biology,2026
+LRN-000093,Eli Novak,Engineering,2023
+LRN-000094,Omar Ito,Law,2025
+LRN-000095,Ben Petrov,History,2025
+LRN-000096,Hana Haddad,Psychology,2023
+LRN-000097,Ivan Gupta,Computer Science,2024
+LRN-000098,Tara Brandt,Physics,2024
+LRN-000099,Fatima Muller,Biology,2023
+LRN-000100,Ivan Novak,Computer Science,2024
+LRN-000101,Omar Silva,Psychology,2025
+LRN-000102,Vik Fischer,History,2026
+LRN-000103,Kofi Tanaka,Economics,2023
+LRN-000104,Rosa Fischer,Economics,2026
+LRN-000105,Fatima Khan,Physics,2026
+LRN-000106,Chen Muller,Physics,2024
+LRN-000107,Eli Tanaka,Psychology,2024
+LRN-000108,Yusuf Ito,Biology,2024
+LRN-000109,Yusuf Muller,Physics,2025
+LRN-000110,Gus Lopez,Engineering,2025
+LRN-000111,Quinn Castillo,Engineering,2025
+LRN-000112,Fatima Silva,Law,2026
+LRN-000113,Tara Gupta,Physics,2026
+LRN-000114,Yusuf Quist,Psychology,2023
+LRN-000115,Uma Abara,Engineering,2024
+LRN-000116,Uma Silva,History,2024
+LRN-000117,Ben Castillo,Law,2026
+LRN-000118,Ivan Khan,Computer Science,2026
+LRN-000119,Mateo Lopez,Engineering,2023
+LRN-000120,Mateo Evans,Biology,2026
+LRN-000121,Chen Ito,Law,2025
+LRN-000122,Dara Petrov,Biology,2024
+LRN-000123,Lena Quist,History,2024
+LRN-000124,Yusuf Abara,Physics,2026
+LRN-000125,Omar Tanaka,Biology,2026
+LRN-000126,Mateo Jensen,Economics,2025
+LRN-000127,Gus Jensen,Physics,2025
+LRN-000128,Uma Brandt,Psychology,2023
+LRN-000129,Kofi Castillo,Biology,2025
+LRN-000130,Yusuf Gupta,Psychology,2024
+LRN-000131,Chen Silva,Physics,2025
+LRN-000132,Tara Okafor,Computer Science,2024
+LRN-000133,Priya Jensen,Economics,2024
+LRN-000134,Nia Tanaka,Engineering,2024
+LRN-000135,Mateo Fischer,Economics,2023
+LRN-000136,Sam Silva,Engineering,2025
+LRN-000137,Quinn Evans,Biology,2025
+LRN-000138,Sam Tanaka,Physics,2025
+LRN-000139,Hana Evans,Engineering,2025
+LRN-000140,Kofi Okafor,Biology,2024
+LRN-000141,Gus Haddad,History,2024
+LRN-000142,Ana Castillo,Computer Science,2026
+LRN-000143,Ivan Okafor,Physics,2023
+LRN-000144,Uma Castillo,Law,2025
+LRN-000145,Sam Petrov,Computer Science,2023
+LRN-000146,Eli Okafor,Physics,2025
+LRN-000147,Dara Haddad,Engineering,2026
+LRN-000148,Wen Dubois,History,2025
+LRN-000149,Dara Petrov,Computer Science,2026
+LRN-000150,Kofi Tanaka,History,2023
+LRN-000151,Kofi Jensen,Biology,2026
+LRN-000152,Quinn Khan,Psychology,2026
+LRN-000153,Chen Brandt,Biology,2025
+LRN-000154,Dara Petrov,Computer Science,2024
+LRN-000155,Hana Tanaka,Biology,2025
+LRN-000156,Hana Abara,Economics,2026
+LRN-000157,Kofi Dubois,Economics,2025
+LRN-000158,Dara Castillo,Physics,2025
+LRN-000159,Kofi Jensen,Biology,2023
+LRN-000160,Tara Khan,Biology,2024
+LRN-000161,Dara Jensen,Psychology,2026
+LRN-000162,Ivan Dubois,Economics,2026
+LRN-000163,Hana Silva,Law,2026
+LRN-000164,Hana Quist,Engineering,2024
+LRN-000165,Ivan Jensen,Computer Science,2026
+LRN-000166,Quinn Castillo,Law,2023
+LRN-000167,Chen Khan,Physics,2025
+LRN-000168,Yusuf Haddad,Physics,2025
+LRN-000169,Priya Gupta,Computer Science,2025
+LRN-000170,Nia Dubois,Psychology,2025
+LRN-000171,Kofi Khan,Psychology,2025
+LRN-000172,Omar Brandt,Psychology,2025
+LRN-000173,Uma Abara,Law,2023
+LRN-000174,Dara Fischer,Psychology,2025
+LRN-000175,Rosa Gupta,Economics,2025
+LRN-000176,Sam Petrov,History,2023
+LRN-000177,Ana Abara,Biology,2024
+LRN-000178,Tara Dubois,Engineering,2026
+LRN-000179,Uma Castillo,Biology,2024
+LRN-000180,Ana Quist,Economics,2023
+LRN-000181,Sam Jensen,Biology,2026
+LRN-000182,Vik Muller,Computer Science,2026
+LRN-000183,Nia Lopez,Economics,2025
+LRN-000184,Kofi Fischer,Economics,2024
+LRN-000185,Chen Muller,Engineering,2023
+LRN-000186,Ivan Brandt,Engineering,2024
+LRN-000187,Ivan Haddad,Economics,2023
+LRN-000188,Ivan Fischer,Law,2024
+LRN-000189,Uma Lopez,Psychology,2025
+LRN-000190,Vik Haddad,Engineering,2026
+LRN-000191,Nia Castillo,Psychology,2025
+LRN-000192,Hana Okafor,Engineering,2026
+LRN-000193,Mateo Muller,History,2023
+LRN-000194,Fatima Gupta,Computer Science,2025
+LRN-000195,Vik Silva,Biology,2026
+LRN-000196,Priya Novak,Biology,2023
+LRN-000197,Omar Lopez,Economics,2024
+LRN-000198,Mateo Khan,Engineering,2024
+LRN-000199,Quinn Abara,Computer Science,2024
+LRN-000200,Jia Dubois,Psychology,2026

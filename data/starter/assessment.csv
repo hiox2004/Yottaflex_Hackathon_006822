@@ -1,0 +1,16 @@
+assessment_id,title,kind,department,instructor_id,due_at
+ASM-000001,BIO-001 Project,project,Biology,REV-000019,2026-03-18T12:00:00Z
+ASM-000002,COM-002 Lab report,lab_report,Computer Science,REV-000021,2026-01-25T12:00:00Z
+ASM-000003,ECO-003 Lab report,lab_report,Economics,REV-000023,2026-08-15T12:00:00Z
+ASM-000004,ENG-004 Report,report,Engineering,REV-000027,2026-02-11T12:00:00Z
+ASM-000005,HIS-005 Project,project,History,REV-000031,2026-01-28T12:00:00Z
+ASM-000006,LAW-006 Project,project,Law,REV-000032,2026-01-31T12:00:00Z
+ASM-000007,PHY-007 Coding task,coding_task,Physics,REV-000036,2026-08-27T12:00:00Z
+ASM-000008,PSY-008 Lab report,lab_report,Psychology,REV-000040,2026-01-22T12:00:00Z
+ASM-000009,BIO-009 Lab report,lab_report,Biology,REV-000017,2026-04-28T12:00:00Z
+ASM-000010,COM-010 Coding task,coding_task,Computer Science,REV-000020,2026-01-26T12:00:00Z
+ASM-000011,ECO-011 Coding task,coding_task,Economics,REV-000023,2026-05-07T12:00:00Z
+ASM-000012,ENG-012 Lab report,lab_report,Engineering,REV-000026,2026-02-26T12:00:00Z
+ASM-000013,HIS-013 Project,project,History,REV-000031,2026-02-13T12:00:00Z
+ASM-000014,LAW-014 Coding task,coding_task,Law,REV-000034,2026-06-06T12:00:00Z
+ASM-000015,PHY-015 Lab report,lab_report,Physics,REV-000036,2026-06-02T12:00:00Z
