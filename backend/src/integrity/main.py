@@ -5,4 +5,4 @@ from fastapi import FastAPI
 from integrity.api import health
 
 app = FastAPI(title="Academic Integrity Workflow", version="0.1.0")
-app.include_router(health.router)
+app.include_router(health.router, prefix="/api")

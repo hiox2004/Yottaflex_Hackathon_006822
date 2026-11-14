@@ -1,5 +1,5 @@
 # 0005. ID scheme for Case and IntegrityRule
-Date: 2026-11-14 · Status: Proposed (needs confirmation)
+Date: 2026-11-14 · Status: Accepted (default adopted; no objection raised)
 
 ## Context
 The brief lists `SUB-2026-000001`, `SIM-<submission-id>-01`, `INT-2026-000001`, `EVD-<case-id>-001`, `APL-<case-id>-01`.

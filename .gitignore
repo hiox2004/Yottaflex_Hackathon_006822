@@ -27,7 +27,11 @@ frontend/dist/
 .env.*
 !.env.example
 
-# ---- Generated scratch (final datasets under data/ ARE tracked; scratch is not) ----
+# ---- Generated data (decision 0009): starter is tracked; full-scale bulk files are regenerated from the seed ----
+/data/full/*
+!/data/full/manifest.json
+!/data/full/VALIDATION.md
+/data/ground_truth/full/
 /data/tmp/
 /data/_scratch/
 

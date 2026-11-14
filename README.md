@@ -35,10 +35,14 @@ Requires Docker and Python 3.11+.
 ```bash
 docker compose up -d db                       # PostgreSQL on localhost:5433
 python -m venv .venv
-.venv/Scripts/pip install -e "backend[dev]"   # Windows; .venv/bin/pip on macOS/Linux
+.venv/Scripts/pip install -r backend/requirements.lock   # pinned versions (Windows; .venv/bin/pip on macOS/Linux)
+.venv/Scripts/pip install -e backend --no-deps
 cp .env.example .env
-cd backend && ../.venv/Scripts/uvicorn integrity.main:app --reload    # http://localhost:8000/health
+.venv/Scripts/python -m integrity.dbload      # create the schema (add --scale starter to load seed data)
+cd backend && ../.venv/Scripts/uvicorn integrity.main:app --reload    # http://localhost:8000/api/health
 ```
+
+Frontend (separate terminal): `cd frontend && npm install && npm run dev`.
 
 ## Quality checks
 
