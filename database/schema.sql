@@ -89,7 +89,8 @@ CREATE TABLE similarity_report (
                          (round(matched_words::numeric / total_words, 3)) STORED,
   adjusted_score       numeric(4, 3) GENERATED ALWAYS AS
                          (round((matched_words - template_words - quoted_words)::numeric / total_words, 3)) STORED,
-  CHECK (template_words + quoted_words <= matched_words AND matched_words <= total_words)
+  CHECK (template_words + quoted_words <= matched_words AND matched_words <= total_words),
+  CHECK (similarity_report_id LIKE 'SIM-' || submission_id || '-%')  -- id embeds its submission
 );
 
 -- ---------- Cases ----------
@@ -114,7 +115,8 @@ CREATE TABLE evidence_item (
   kind        text NOT NULL CHECK (kind IN
                 ('matched_passage', 'source_reference', 'template_match', 'quote_citation', 'learner_statement')),
   description text NOT NULL,
-  added_at    timestamptz NOT NULL
+  added_at    timestamptz NOT NULL,
+  CHECK (evidence_id LIKE 'EVD-' || case_id || '-%')  -- id embeds its case
 );
 
 CREATE TABLE decision (
@@ -123,7 +125,8 @@ CREATE TABLE decision (
   reviewer_id text REFERENCES reviewer,  -- NULL means the system decided; a rule violation, kept loadable on purpose
   outcome     text NOT NULL CHECK (outcome IN ('no_violation', 'violation_confirmed', 'inconclusive')),
   rationale   text NOT NULL,
-  decided_at  timestamptz NOT NULL
+  decided_at  timestamptz NOT NULL,
+  CHECK (decision_id LIKE 'DEC-' || case_id || '-%')  -- id embeds its case
 );
 
 -- N:M bridge: which evidence a decision's rationale cites.
@@ -142,7 +145,8 @@ CREATE TABLE appeal (
   outcome     text CHECK (outcome IN ('upheld', 'overturned', 'partially_upheld')),
   closed_at   timestamptz,
   CHECK ((outcome IS NULL) = (closed_at IS NULL)),
-  CHECK (closed_at IS NULL OR closed_at >= filed_at)
+  CHECK (closed_at IS NULL OR closed_at >= filed_at),
+  CHECK (appeal_id LIKE 'APL-' || case_id || '-%')  -- id embeds its case
 );
 
 -- ---------- Append-only history ----------
@@ -184,6 +188,12 @@ CREATE TRIGGER case_event_append_only BEFORE UPDATE OR DELETE ON case_event
   FOR EACH ROW EXECUTE FUNCTION forbid_change();
 CREATE TRIGGER case_event_no_truncate BEFORE TRUNCATE ON case_event
   FOR EACH STATEMENT EXECUTE FUNCTION forbid_change();
+
+-- Evidence and decisions are never edited once recorded; later changes are new rows plus events.
+CREATE TRIGGER evidence_item_immutable BEFORE UPDATE OR DELETE ON evidence_item
+  FOR EACH ROW EXECUTE FUNCTION forbid_change();
+CREATE TRIGGER decision_immutable BEFORE UPDATE OR DELETE ON decision
+  FOR EACH ROW EXECUTE FUNCTION forbid_change();
 
 -- ---------- Indexes on common joins ----------
 

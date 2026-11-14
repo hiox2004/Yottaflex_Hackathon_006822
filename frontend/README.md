@@ -1,17 +1,16 @@
-# Frontend
+# Academic Integrity Workflow frontend
 
-React + Vite single-page app. Built after the data and rules are verified.
+React + TypeScript + Vite single-page app. It shows the app title and whether the backend answers `/api/health`.
 
-**Boundaries (keep the tiers separate):**
-- Standalone project: its own `package.json`, lint config and tests. No Python or backend imports.
-- Talks to the backend only over HTTP under `/api` (Vite dev proxy in development; static build served by the backend or any web server for the demo).
-- API types are generated from the backend's OpenAPI schema, never hand-copied.
+Rule: this app talks to the backend only over HTTP under `/api` and never imports backend code.
 
-Planned layout:
+## Commands
+
 ```
-src/
-  api/          generated client + fetch wrapper
-  features/     one folder per feature (queue, case-detail, timeline, appeals, audit)
-  components/   shared UI
-  routes/ lib/
+npm install
+npm run dev        # dev server; /api is proxied to http://localhost:8000
+npm run build      # typecheck + production build to dist/
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit
+npm run test       # Vitest (jsdom)
 ```

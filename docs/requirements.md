@@ -106,7 +106,7 @@ Source: brief.md (pasted problem statement). Pruned by hand from matrix.py outpu
 | Q5 | What is a reviewer conflict? | Reviewer is the submitting learner's instructor or same department, or reviewed the same submission before | med | no |
 | Q6 | Who may close a case? | Academic administrator only; support staff cannot close | low | no |
 | Q7 | Exact threshold values | Score bands: <0.30 no action, 0.30-0.59 log only, 0.60-0.79 review, >=0.80 priority review. Never automatic finding of guilt | med | yes |
-| Q8 | Outcome after appeal | One of: upheld, overturned, partially upheld; closed only after independent review | low | no |
+| Q8 | Outcome after appeal | One of: upheld, overturned, partially_upheld; closed only after independent review | low | no |
 
 ## Assumptions
 - Synthetic data only. No public data used.
