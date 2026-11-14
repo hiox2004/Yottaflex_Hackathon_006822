@@ -173,6 +173,19 @@ export interface Page<T> {
   total: number;
 }
 
+export interface QueueCounts {
+  needs_me: number;
+  under_review: number;
+  awaiting_appeal: number;
+  decided: number;
+  closed: number;
+  dismissed_flags: number;
+}
+
+export interface QueuePageData extends Page<QueueRow> {
+  counts: QueueCounts;
+}
+
 export interface ApiErrorBody {
   error: { code: string; message: string; details: Record<string, unknown> };
 }

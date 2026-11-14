@@ -1,4 +1,4 @@
-// Queue: opens on "Needs you"; tiles, band and "assigned to me" filter the loaded rows; second tab lists dismissed flags.
+// Queue: opens on "Needs you"; tiles (server counts), band and "assigned to me" are server filters; second tab lists dismissed flags.
 import { useMemo, useState } from 'react';
 import { useQueue, useReviewers, useRules } from '../api/hooks';
 import type { Band } from '../api/types';
@@ -9,7 +9,7 @@ import { NeedsTiles, TILES, type TileKey } from '../components/NeedsTiles';
 import { BAND_LABEL } from '../labels';
 import { useSession } from '../session';
 
-const PAGE = 200;
+const PAGE = 50;
 type Tab = 'cases' | 'dismissed';
 
 export function QueuePage() {
@@ -19,16 +19,18 @@ export function QueuePage() {
   const [band, setBand] = useState<Band | ''>('');
   const [mineOnly, setMineOnly] = useState(false);
   const [limit, setLimit] = useState(PAGE);
-  const queue = useQueue(actorId, limit);
+  const filters = {
+    ...(TILES.find((t) => t.key === tile)?.filter ?? {}),
+    ...(band && { band }),
+    ...(mineOnly && { assigned_to: actorId }),
+  };
+  const queue = useQueue(actorId, filters, limit);
   const reviewers = useReviewers(actorId);
   const rules = useRules(actorId);
   const names = useMemo(() => new Map((reviewers.data ?? []).map((r) => [r.reviewer_id, r.name])), [reviewers.data]);
   const activeRule = rules.data?.find((r) => r.effective_to === null) ?? null;
 
   const rows = queue.data?.items ?? [];
-  const match = TILES.find((t) => t.key === tile)?.match ?? (() => true);
-  const shown = rows.filter((r) => match(r) && (!band || r.band === band) && (!mineOnly || r.assignee_ids.includes(actorId)));
-
   return (
     <>
       <div className="page-head">
@@ -40,7 +42,7 @@ export function QueuePage() {
           Cases
         </button>
         <button role="tab" aria-selected={tab === 'dismissed'} onClick={() => setTab('dismissed')}>
-          Dismissed flags
+          Dismissed flags{queue.data ? ` (${queue.data.counts.dismissed_flags})` : ''}
         </button>
       </div>
       {tab === 'dismissed' ? (
@@ -48,7 +50,7 @@ export function QueuePage() {
       ) : (
         <section aria-label="Cases">
           {queue.error && <ErrorBanner error={queue.error} />}
-          <NeedsTiles rows={rows} active={tile} onSelect={setTile} />
+          <NeedsTiles counts={queue.data?.counts} active={tile} onSelect={setTile} />
           <div className="filters">
             <label>
               Band{' '}
@@ -66,7 +68,7 @@ export function QueuePage() {
             </label>
           </div>
           {queue.isPending && <p className="muted">Loading cases…</p>}
-          {queue.data && shown.length === 0 && (
+          {queue.data && rows.length === 0 && (
             <p className="empty">
               {tile === 'needs'
                 ? 'Nothing is waiting on you right now. Pick "All cases" to browse, or switch actor to see another role’s work.'
@@ -74,7 +76,7 @@ export function QueuePage() {
             </p>
           )}
           <ul className="list">
-            {shown.map((row) => (
+            {rows.map((row) => (
               <CaseRow key={row.case_id} row={row} rule={activeRule} names={names} />
             ))}
           </ul>
