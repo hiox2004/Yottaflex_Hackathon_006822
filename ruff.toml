@@ -1,4 +1,5 @@
 # Shared lint/format config for all Python in the repo (backend/ and prompts/).
+# Limits here are the simplicity guardrails from docs/engineering-guidelines.md.
 line-length = 100
 target-version = "py311"
 src = ["backend/src"]
@@ -7,8 +8,24 @@ cache-dir = ".cache/ruff"
 extend-exclude = ["_template", ".claude"]
 
 [lint]
-select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+select = [
+  "E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF",
+  "C90",  # cyclomatic complexity
+  "PLR",  # too many arguments / branches / statements / returns, magic values
+  "ERA",  # commented-out code
+  "T20",  # leftover print()
+  "PT",   # pytest style
+]
 ignore = ["S101"]  # assert is fine in tests
 
+[lint.mccabe]
+max-complexity = 8
+
+[lint.pylint]
+max-args = 5
+max-branches = 10
+max-statements = 30
+
 [lint.per-file-ignores]
-"backend/tests/*" = ["S"]
+"backend/tests/*" = ["S", "PLR2004"]
+"prompts/*.py" = ["T20"]  # command-line script: printing is its output

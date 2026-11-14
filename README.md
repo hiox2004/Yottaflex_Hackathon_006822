@@ -57,5 +57,6 @@ Optional: `pre-commit install` for lint and hygiene hooks on commit.
 ## Documentation
 
 - [docs/architecture.md](docs/architecture.md), [docs/requirements.md](docs/requirements.md)
+- [docs/engineering-guidelines.md](docs/engineering-guidelines.md): how we keep the code simple and readable
 - [docs/decisions/](docs/decisions/README.md): what we decided, why, and the alternatives
 - [prompts/](prompts/README.md): prompt log, exported from session transcripts with `python prompts/export_prompts.py`
