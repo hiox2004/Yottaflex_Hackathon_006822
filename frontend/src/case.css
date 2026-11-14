@@ -383,3 +383,81 @@ h2 {
     gap: 2px;
   }
 }
+
+/* Action dialog and forms */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(10 16 24 / 55%);
+  z-index: 10;
+}
+
+.dialog {
+  position: fixed;
+  z-index: 11;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
+}
+
+.dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.dialog-head h2 {
+  margin: 0;
+  font: 700 1.2rem var(--font-head);
+}
+
+.icon-btn {
+  width: 36px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.field textarea {
+  font: inherit;
+  font-weight: 400;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.field .check {
+  font-weight: 400;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--fail);
+  font-weight: 600;
+}

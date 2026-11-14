@@ -186,6 +186,20 @@ export interface QueuePageData extends Page<QueueRow> {
   counts: QueueCounts;
 }
 
+/** Provisional: the backend has not yet proposed final shapes for /audit/metrics and /audit/validation. */
+export interface AuditMetrics {
+  dataset_hash: string;
+  auditor: { issue_type: IssueType; precision: number; recall: number; f1: number; labelled: number }[];
+  triage: { scenario: string; cases: number; flagged: number; dismissed: number }[];
+}
+
+export interface ValidationSummary {
+  dataset_hash: string;
+  counts: Record<string, number>;
+  checks: { name: string; passed: boolean; violations: number }[];
+  distributions: { title: string; rows: { label: string; count: number }[] }[];
+}
+
 export interface ApiErrorBody {
   error: { code: string; message: string; details: Record<string, unknown> };
 }

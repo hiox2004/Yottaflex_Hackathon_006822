@@ -1,19 +1,21 @@
 # Frontend tab status
 
-Updated: M2 done · Next: M3 (18:10), M4 (18:45 freeze)
+Updated: M4 done (feature complete) · lint, typecheck, 8 tests, build green
 
 ## Done
-- M1: router, actor picker, engine switch, fixture client, types, tokens (light + dark), Queue + Dismissed tab
-- v1.2: tiles use `counts` from GET /queue; `needs_my_action` and status filters are sent to the server (client and fixtures)
-- M2: Case page read-only (strip, gates, engine panel, journey rail, action list with reasons, record, timeline, eligible reviewers) and Rules page
-- Visual check done with headless Chrome screenshots (Queue and Case, light and dark); fixed gate grid, journey rail "no appeal" state, actor select width
-- Dependencies (exact): react-router-dom 6.28.0 (routes), @tanstack/react-query 5.62.7 (refetch after writes), lucide-react 0.468.0 (icons)
+- M1-M2: router, actor picker, engine switch, tokens (light + dark), Queue (v1.2 `counts`, server filters), Case read-only, Rules; visual check in headless Chrome
+- M3: write actions from `action_checks` (assign, evidence, decide, reopen, appeal, appeal reviewer and outcome, close) in a dialog; server refusals shown in the dialog; `simplify` applied
+- M4: Audit page (findings link to cases, auditor P/R/F1, triage, validation, synthetic caveat), 8 Vitest tests
+- Live API is now the default; `VITE_USE_FIXTURES=true npm run dev` gives the offline fixture demo (tests set it themselves)
+- Dependencies (exact): react-router-dom 6.28.0 (routes), @tanstack/react-query 5.62.7 (refetch after writes), lucide-react 0.468.0 (icons), @radix-ui/react-dialog 1.1.2 (accessible action dialogs)
 
-## Next
-- M3 write actions from `action_checks`; M4 Audit page, live API, tests, build
+## Not verified
+- Live API: the backend was not running, so the switch and the real response shapes are untested. Writes in fixture mode answer 501 by design.
+- Dialogs and the Audit page have no screenshot check yet.
 
 ## Blocked
 - none
 
 ## Contract change requests
-- Tiles "Under review", "Awaiting appeal" and "Decided" each span two statuses; the client sends `status=open,under_review` (comma-separated). Please accept a comma list on `GET /queue?status=`.
+- `GET /queue?status=` must accept a comma list: tiles send `status=open,under_review`, `appealed,appeal_review`, `decided,appeal_decided`.
+- `/audit/metrics` and `/audit/validation`: shapes in `frontend/src/api/types.ts` (AuditMetrics, ValidationSummary) are my guess; please send the final ones.

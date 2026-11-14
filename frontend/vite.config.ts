@@ -11,5 +11,6 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    env: { VITE_USE_FIXTURES: 'true' },
   },
 });

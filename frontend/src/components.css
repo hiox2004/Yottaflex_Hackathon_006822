@@ -268,3 +268,38 @@ a.case-row:hover {
     margin-left: 0;
   }
 }
+
+/* Audit tables */
+.audit-block {
+  margin-top: 28px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table th,
+.table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.table th {
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  background: var(--surface-2);
+}
+
+@media (max-width: 760px) {
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
+}

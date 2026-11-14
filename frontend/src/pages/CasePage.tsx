@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCase, useEligible, useFindings, useTimeline } from '../api/hooks';
 import type { AllowedAction } from '../api/types';
+import { ActionDialog } from '../components/ActionDialog';
 import { ActionList } from '../components/ActionList';
 import { BandBadge, StatusBadge } from '../components/Badge';
 import { AppealPanel, DecisionList, EvidenceList } from '../components/CaseRecord';
@@ -19,11 +20,11 @@ import { useSession } from '../session';
 export function CasePage() {
   const { id = '' } = useParams();
   const { actorId, engine } = useSession();
-  const [, setOpenAction] = useState<AllowedAction | null>(null); // wired to forms in M3
+  const [openAction, setOpenAction] = useState<AllowedAction | null>(null);
   const detailQuery = useCase(actorId, id);
   const timeline = useTimeline(actorId, id);
   const findings = useFindings(actorId, id);
-  const eligible = useEligible(actorId, id, 'case', true);
+  const eligible = useEligible(actorId, id, 'case');
   const detail = detailQuery.data;
 
   if (detailQuery.error) {
@@ -59,6 +60,7 @@ export function CasePage() {
         <strong>A flag is not a finding.</strong> This case was flagged for review because of text similarity. Nothing is recorded against the learner
         until a reviewer decides.
       </p>
+      <ActionDialog action={openAction} detail={detail} onClose={() => setOpenAction(null)} />
       <JourneyRail detail={detail} />
       <div className="case-layout">
         <div className="case-col">

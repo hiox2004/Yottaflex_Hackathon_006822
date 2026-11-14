@@ -13,7 +13,7 @@ describe('QueuePage', () => {
     expect(screen.queryByText('Elena Petrova')).toBeNull(); // closed, not waiting on the actor
 
     fireEvent.click(screen.getByRole('button', { name: /Closed/ }));
-    expect(screen.getByText('Elena Petrova')).toBeTruthy();
+    expect(await screen.findByText('Elena Petrova')).toBeTruthy(); // tiles are server filters, so wait for the refetch
     expect(screen.queryByText('Maya Okonkwo')).toBeNull();
   });
 

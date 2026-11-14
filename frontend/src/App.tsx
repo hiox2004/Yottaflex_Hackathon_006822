@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Header } from './components/Header';
+import { AuditPage } from './pages/AuditPage';
 import { Placeholder } from './pages/Placeholder';
 import { CasePage } from './pages/CasePage';
 import { QueuePage } from './pages/QueuePage';
@@ -21,7 +22,7 @@ export function App({ client = makeQueryClient() }: { client?: QueryClient }) {
               <Route path="/" element={<QueuePage />} />
               <Route path="/cases/:id" element={<CasePage />} />
               <Route path="/rules" element={<RulesPage />} />
-              <Route path="/audit" element={<Placeholder title="Audit" />} />
+              <Route path="/audit" element={<AuditPage />} />
               <Route path="*" element={<Placeholder title="Page not found" />} />
             </Routes>
           </main>

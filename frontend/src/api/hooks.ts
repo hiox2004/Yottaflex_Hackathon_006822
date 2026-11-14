@@ -1,7 +1,8 @@
 // react-query hooks over the client. The actor id is part of every key so a switch refetches (needs_my_action changes).
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { apiGet } from './client';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiGet, apiPost } from './client';
 import type {
+  AuditMetrics,
   CaseDetail,
   DismissedFlag,
   EligibleReviewer,
@@ -11,6 +12,7 @@ import type {
   Reviewer,
   Rule,
   TimelineEvent,
+  ValidationSummary,
 } from './types';
 
 function qs(params: object): string {
@@ -53,15 +55,34 @@ export const useCase = (actorId: string, caseId: string) =>
 export const useTimeline = (actorId: string, caseId: string) =>
   useQuery({ queryKey: ['timeline', actorId, caseId], queryFn: () => apiGet<TimelineEvent[]>(`/cases/${caseId}/timeline`) });
 
-export const useEligible = (actorId: string, caseId: string, purpose: 'case' | 'appeal', enabled: boolean) =>
+export const useEligible = (actorId: string, caseId: string, purpose: 'case' | 'appeal') =>
   useQuery({
     queryKey: ['eligible', actorId, caseId, purpose],
     queryFn: () => apiGet<EligibleReviewer[]>(`/cases/${caseId}/eligible-reviewers?purpose=${purpose}`),
-    enabled,
   });
+
+export const useAuditMetrics = (actorId: string) =>
+  useQuery({ queryKey: ['audit-metrics', actorId], queryFn: () => apiGet<AuditMetrics>('/audit/metrics') });
+
+export const useAuditValidation = (actorId: string) =>
+  useQuery({ queryKey: ['audit-validation', actorId], queryFn: () => apiGet<ValidationSummary>('/audit/validation') });
 
 export const useFindings = (actorId: string, caseId?: string) =>
   useQuery({
     queryKey: ['findings', actorId, caseId ?? 'all'],
     queryFn: () => apiGet<FindingsResponse>(`/audit/findings${qs({ case_id: caseId })}`),
   });
+
+/** One write: the response is the updated CaseDetail, which replaces the cached case; dependent views refetch. */
+export function useCaseWrite(actorId: string, caseId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ path, body }: { path: string; body: unknown }) => apiPost<CaseDetail>(`/cases/${caseId}${path}`, body),
+    onSuccess: (detail) => {
+      client.setQueryData(['case', actorId, caseId], detail);
+      for (const key of [['timeline', actorId, caseId], ['findings', actorId], ['eligible', actorId, caseId], ['queue', actorId]]) {
+        void client.invalidateQueries({ queryKey: key });
+      }
+    },
+  });
+}

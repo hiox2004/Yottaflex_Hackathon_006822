@@ -1,6 +1,7 @@
 // Fixture router: answers GET paths from hand-written data when VITE_USE_FIXTURES is not "false".
 import { ApiError } from '../errors';
 import type { Page } from '../types';
+import { auditMetrics, validationSummary } from './audit';
 import { caseDetails, eligibleFor, findings, timelineFor } from './cases';
 import { dismissedFlags, queueRows } from './queue';
 import { reviewers } from './reviewers';
@@ -54,6 +55,8 @@ export function fixtureGet(path: string): unknown {
     if (found[2]) return eligibleFor(query.get('purpose') ?? 'case');
     return detail;
   }
+  if (route === '/audit/metrics') return auditMetrics;
+  if (route === '/audit/validation') return validationSummary;
   if (route === '/audit/findings') {
     const caseId = query.get('case_id');
     const items = caseId ? findings.filter((f) => f.case_id === caseId) : findings;

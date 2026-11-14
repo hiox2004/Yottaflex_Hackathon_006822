@@ -5,7 +5,8 @@ import { fixtureGet } from './fixtures';
 import type { ApiErrorBody } from './types';
 
 const BASE = import.meta.env.VITE_API_BASE ?? '/api';
-export const USE_FIXTURES = import.meta.env.VITE_USE_FIXTURES !== 'false';
+// Live API by default since M4; VITE_USE_FIXTURES=true answers reads from hand-written fixtures (offline demo, tests).
+export const USE_FIXTURES = import.meta.env.VITE_USE_FIXTURES === 'true';
 
 async function toError(response: Response): Promise<ApiError> {
   try {
@@ -24,7 +25,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  if (USE_FIXTURES) throw new ApiError(501, 'FIXTURE_MODE', 'Writes need the live API (VITE_USE_FIXTURES=false).');
+  if (USE_FIXTURES) throw new ApiError(501, 'FIXTURE_MODE', 'Writes need the live API (unset VITE_USE_FIXTURES).');
   const response = await fetch(BASE + path, {
     method: 'POST',
     headers: { 'X-Actor-Id': getActorId(), 'Content-Type': 'application/json' },
