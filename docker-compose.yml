@@ -1,0 +1,24 @@
+# Database tier. Local dev only; credentials are throwaway.
+#   docker compose up -d db     start
+#   docker compose down         stop (data kept in the named volume)
+#   docker compose down -v      stop and wipe data
+services:
+  db:
+    image: postgres:16
+    container_name: integrity-db
+    environment:
+      POSTGRES_USER: integrity
+      POSTGRES_PASSWORD: integrity_dev
+      POSTGRES_DB: integrity
+    ports:
+      - "5433:5432"   # 5433 on the host so it never clashes with another local Postgres
+    volumes:
+      - integrity_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U integrity -d integrity"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  integrity_pgdata:

@@ -1,0 +1,5 @@
+* text=auto eol=lf
+# Generated seed data must be byte-identical on every platform (checksums are part of the reproducibility proof)
+data/**/*.csv   text eol=lf
+data/**/*.json  text eol=lf
+data/**/*.sql   text eol=lf

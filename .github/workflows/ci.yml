@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: integrity
+          POSTGRES_PASSWORD: integrity_dev
+          POSTGRES_DB: integrity
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U integrity -d integrity"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://integrity:integrity_dev@localhost:5433/integrity
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check . && ruff format --check .
+      - name: Type check
+        run: mypy
+      - name: Tests (unit + integration)
+        run: pytest --cov=integrity --cov-report=term-missing

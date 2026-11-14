@@ -1,0 +1,42 @@
+# ---- Local tooling / working template: not part of the submission ----
+/kb/
+/tools/
+/research/
+/starter/
+/.claude/
+/CLAUDE.md
+/brief.md
+# Raw prompt export contains pasted problem-statement text. Review/redact it, then add it deliberately (git add -f).
+/prompts/prompts.md
+
+# ---- Python ----
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+.coverage
+htmlcov/
+*.egg-info/
+
+# ---- Node ----
+node_modules/
+frontend/dist/
+
+# ---- Secrets / local config ----
+.env
+.env.*
+!.env.example
+
+# ---- Generated scratch (final datasets under data/ ARE tracked; scratch is not) ----
+/data/tmp/
+/data/_scratch/
+ground_truth_local/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
