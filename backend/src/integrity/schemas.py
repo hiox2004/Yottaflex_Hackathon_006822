@@ -163,6 +163,15 @@ class FlagPage(BaseModel):
     total: int
 
 
+class ActorOut(BaseModel):
+    """One person in the actor picker: a learner or a staff member."""
+
+    actor_id: str
+    name: str
+    role: str
+    department: str
+
+
 class TimelineEvent(BaseModel):
     event_id: int
     event_type: EventType
@@ -173,6 +182,7 @@ class TimelineEvent(BaseModel):
     to_status: Status | None
     ref_id: str | None
     reason: str | None
+    detail: str | None = None
 
 
 class EligibleReviewer(Reviewer):
@@ -207,6 +217,18 @@ class EvidenceBody(BaseModel):
 
 class ReopenBody(BaseModel):
     reason: Text
+
+
+class RecuseBody(BaseModel):
+    # Not Text: a blank reason is refused by the guard (RECUSAL_REASON_REQUIRED, plain message).
+    reason: Annotated[str, StringConstraints(strip_whitespace=True, max_length=2000)]
+
+
+class CloseBody(BaseModel):
+    # Optional body: `{}` or no body closes normally. A waiver closes an adverse case before its
+    # appeal window ends; the reason is checked by the service (WAIVER_REASON_REQUIRED).
+    waive_appeal_window: bool = False
+    reason: Annotated[str | None, StringConstraints(strip_whitespace=True, max_length=2000)] = None
 
 
 class DecisionBody(BaseModel):

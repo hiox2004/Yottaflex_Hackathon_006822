@@ -7,16 +7,23 @@ import psycopg
 Row = dict[str, Any]
 
 
-def count_dismissed(con: psycopg.Connection[Row]) -> int:
-    row = con.execute("SELECT count(*) AS n FROM v_flag WHERE outcome = 'dismissed'").fetchone()
+# `learner_id` NULL means every learner (staff); a learner passes their own id.
+_DISMISSED = """FROM v_flag WHERE outcome = 'dismissed'
+  AND (%(learner_id)s::text IS NULL OR learner_id = %(learner_id)s)"""
+
+
+def count_dismissed(con: psycopg.Connection[Row], learner_id: str | None = None) -> int:
+    row = con.execute(f"SELECT count(*) AS n {_DISMISSED}", {"learner_id": learner_id}).fetchone()
     return int(row["n"]) if row else 0
 
 
-def dismissed(con: psycopg.Connection[Row], limit: int, offset: int) -> tuple[list[Row], int]:
+def dismissed(
+    con: psycopg.Connection[Row], limit: int, offset: int, learner_id: str | None = None
+) -> tuple[list[Row], int]:
     """A page of dismissed flags in id order, and the total."""
-    sql = """SELECT similarity_report_id, submission_id, learner_id, raw_score, quoted_score,
-                    template_score, adjusted_score, dismissal_reason
-             FROM v_flag WHERE outcome = 'dismissed'
-             ORDER BY similarity_report_id LIMIT %s OFFSET %s"""
-    rows = con.execute(sql, (limit, offset)).fetchall()
-    return rows, count_dismissed(con)
+    sql = f"""SELECT similarity_report_id, submission_id, learner_id, raw_score, quoted_score,
+                     template_score, adjusted_score, dismissal_reason
+              {_DISMISSED} ORDER BY similarity_report_id LIMIT %(limit)s OFFSET %(offset)s"""
+    params = {"learner_id": learner_id, "limit": limit, "offset": offset}
+    rows = con.execute(sql, params).fetchall()
+    return rows, count_dismissed(con, learner_id)

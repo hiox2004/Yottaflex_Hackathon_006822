@@ -31,6 +31,19 @@ QUEUE_ROW_KEYS = {
     "needs_my_action",
 }
 COUNT_KEYS = {"needs_me", "under_review", "awaiting_appeal", "decided", "closed", "dismissed_flags"}
+# Same wording as frontend/src/labels.ts (OUTCOME_LABEL, EVIDENCE_LABEL).
+OUTCOME_WORDS = {
+    "no_violation": "No violation found",
+    "violation_confirmed": "Violation confirmed by reviewer",
+    "inconclusive": "Inconclusive",
+}
+KIND_WORDS = {
+    "matched_passage": "Matched passage",
+    "source_reference": "Source reference",
+    "template_match": "Template match",
+    "quote_citation": "Quote with citation",
+    "learner_statement": "Learner statement",
+}
 
 
 def test_queue_has_rows_totals_and_counts_over_all_cases(api: Api) -> None:
@@ -76,6 +89,24 @@ def test_dismissed_flags_and_rules_and_timeline(api: Api) -> None:
     assert [r["version"] for r in api.get("/rules", admin)] == [1, 2]
     case_id = api.first_case(admin)
     assert api.get(f"/cases/{case_id}/timeline", admin)[0]["event_type"] == "case_opened"
+
+
+def test_timeline_details_say_what_happened_for_a_decision_and_evidence(api: Api) -> None:
+    admin = api.reviewer("academic_administrator")
+    for row in api.get("/queue?limit=200", admin)["items"]:
+        detail = api.get(f"/cases/{row['case_id']}", admin)
+        if detail["decisions"] and detail["evidence"]:
+            break
+    else:
+        raise AssertionError("seed has no case with both a decision and evidence")
+    timeline = api.get(f"/cases/{detail['case_id']}/timeline", admin)
+    decision = detail["decisions"][0]
+    evidence = detail["evidence"][0]
+    by_ref = {e["ref_id"]: e for e in timeline}
+    assert by_ref[decision["decision_id"]]["detail"] == OUTCOME_WORDS[decision["outcome"]]
+    assert by_ref[evidence["evidence_id"]]["detail"] == (
+        f"{KIND_WORDS[evidence['kind']]}: {evidence['description'][:120]}"
+    )
 
 
 def test_eligible_reviewers_list_everyone_and_mark_roles_that_cannot_review(api: Api) -> None:

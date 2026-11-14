@@ -42,12 +42,18 @@ WHERE c.case_id = %s
 
 REVIEWERS_SQL = """
 SELECT cr.reviewer_id, rv.name, cr.role_in_case, cr.assigned_at
-FROM case_reviewer cr JOIN reviewer rv ON rv.reviewer_id = cr.reviewer_id
+FROM v_case_active_reviewer cr JOIN reviewer rv ON rv.reviewer_id = cr.reviewer_id
 WHERE cr.case_id = %s ORDER BY cr.assigned_at, cr.reviewer_id
 """
 
+RECUSED_SQL = """
+SELECT DISTINCT ref_id FROM case_event
+WHERE case_id = %s AND event_type = 'reviewer_recused' ORDER BY ref_id
+"""
+
 EVIDENCE_SQL = """
-SELECT evidence_id, kind, description, added_at, added_by
+SELECT evidence_id, kind, description, added_at,
+       COALESCE(added_by, added_by_learner_id) AS added_by
 FROM evidence_item WHERE case_id = %s ORDER BY added_at, evidence_id
 """
 
@@ -86,7 +92,13 @@ def header(con: psycopg.Connection[Row], case_id: str) -> Row | None:
 
 
 def reviewers_of(con: psycopg.Connection[Row], case_id: str) -> list[Row]:
+    """Reviewers still on the case (recused ones are hidden; see recused_reviewer_ids)."""
     return con.execute(REVIEWERS_SQL, (case_id,)).fetchall()
+
+
+def recused_reviewer_ids(con: psycopg.Connection[Row], case_id: str) -> list[str]:
+    """Reviewer ids that recused from the case, sorted. They are not in reviewers_of."""
+    return [r["ref_id"] for r in con.execute(RECUSED_SQL, (case_id,)).fetchall()]
 
 
 def evidence_of(con: psycopg.Connection[Row], case_id: str) -> list[Row]:

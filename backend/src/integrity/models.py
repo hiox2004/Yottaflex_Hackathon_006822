@@ -23,6 +23,7 @@ class Role(StrEnum):
     ACADEMIC_REVIEWER = "academic_reviewer"
     ACADEMIC_ADMINISTRATOR = "academic_administrator"
     SUPPORT_STAFF = "support_staff"
+    LEARNER = "learner"  # the actor is a learner id (LRN-...); learners see only their own cases
 
 
 class Band(StrEnum):
@@ -72,6 +73,7 @@ class EventType(StrEnum):
     APPEAL_REVIEWER_ASSIGNED = "appeal_reviewer_assigned"
     APPEAL_DECIDED = "appeal_decided"
     CASE_CLOSED = "case_closed"
+    RECUSED = "reviewer_recused"
 
 
 class DismissalReason(StrEnum):
@@ -95,6 +97,7 @@ class Action(StrEnum):
     ASSIGN_APPEAL_REVIEWER = "assign_appeal_reviewer"
     DECIDE_APPEAL = "decide_appeal"
     CLOSE = "close"
+    RECUSE = "recuse"
 
 
 class ConflictCode(StrEnum):
@@ -137,6 +140,8 @@ class ActionCheck(BaseModel):
     action: Action
     allowed: bool
     reasons: list[Reason]
+    # True when a recorded waiver can override the refusal (close inside the appeal window).
+    waivable: bool = False
 
 
 class ExplainStep(BaseModel):

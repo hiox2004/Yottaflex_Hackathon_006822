@@ -10,7 +10,13 @@ from fastapi.responses import JSONResponse
 from integrity.errors import NotFoundError, RuleViolation
 
 log = logging.getLogger("integrity.api")
-STATUS = {"UNKNOWN_ACTOR": 401, "ROLE_NOT_ALLOWED": 403, "NOT_FOUND": 404, "VALIDATION_ERROR": 422}
+STATUS = {
+    "UNKNOWN_ACTOR": 401,
+    "ROLE_NOT_ALLOWED": 403,
+    "NOT_YOUR_CASE": 403,
+    "NOT_FOUND": 404,
+    "VALIDATION_ERROR": 422,
+}
 CONFLICT = 409
 
 

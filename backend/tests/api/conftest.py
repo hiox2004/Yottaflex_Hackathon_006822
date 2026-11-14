@@ -19,6 +19,7 @@ from integrity.clock import FixedClock
 from integrity.config import REPO_ROOT
 from integrity.dbload import SCHEMA
 from integrity.services.common import Connection
+from tests.db_schema import quote, schema_name
 
 SEED = REPO_ROOT / "data" / "starter" / "seed.sql"
 NOW = datetime(2026, 11, 14, 12, 0, tzinfo=UTC)  # after every generated event
@@ -58,7 +59,8 @@ class Api:
 @pytest.fixture
 def api() -> Iterator[Api]:
     with db.connect(dict_rows=True) as con:
-        con.execute("CREATE SCHEMA scratch; SET LOCAL search_path TO scratch")
+        schema = quote(schema_name())
+        con.execute(f"CREATE SCHEMA {schema}; SET LOCAL search_path TO {schema}")
         con.execute(SCHEMA.read_text(encoding="utf-8"))
         con.execute(SEED.read_text(encoding="utf-8"))
         # The seed gives explicit event ids: move the sequence past them, as the loader does.

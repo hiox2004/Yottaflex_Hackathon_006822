@@ -2,6 +2,7 @@
   "auditor": [
     {
       "f1": 1.0,
+      "found": 1,
       "issue_type": "AUTO_GUILT_WITHOUT_REVIEW",
       "labelled": 1,
       "precision": 1.0,
@@ -9,6 +10,7 @@
     },
     {
       "f1": 1.0,
+      "found": 1,
       "issue_type": "REVIEWER_CONFLICT",
       "labelled": 1,
       "precision": 1.0,
@@ -16,6 +18,7 @@
     },
     {
       "f1": 1.0,
+      "found": 1,
       "issue_type": "EVIDENCE_AFTER_DECISION_NO_HISTORY",
       "labelled": 1,
       "precision": 1.0,
@@ -23,42 +26,78 @@
     },
     {
       "f1": 1.0,
+      "found": 1,
       "issue_type": "APPEAL_CLOSED_NO_INDEPENDENT_REVIEW",
       "labelled": 1,
       "precision": 1.0,
       "recall": 1.0
     }
   ],
+  "caveat": "synthetic data: scores show rule coverage, not generalisation",
   "dataset_hash": "a30b344a1a95830b09cca01b647615095475882c1cd45eb5baedfc603269eea5",
+  "ground_truth_sha256": {
+    "ground_truth.csv": "d6527816afe77af11a5ab1f3c130179208459da952e304ee33aa68af77acf571",
+    "ground_truth.json": "39e40aed07d8999a63baff67f2e160f2243d85bdd97fb83a7d5db4a8f663175f"
+  },
   "triage": [
     {
       "cases": 0,
       "dismissed": 0,
+      "expected": 896,
+      "expected_outcome": "not_flagged",
       "flagged": 0,
+      "hit_rate": 1.0,
+      "hits": 896,
+      "misses": 0,
+      "not_flagged": 896,
       "scenario": "clean"
     },
     {
       "cases": 0,
       "dismissed": 36,
+      "expected": 36,
+      "expected_outcome": "dismissed",
       "flagged": 36,
+      "hit_rate": 1.0,
+      "hits": 36,
+      "misses": 0,
+      "not_flagged": 0,
       "scenario": "legitimate_quote"
     },
     {
       "cases": 0,
       "dismissed": 31,
+      "expected": 31,
+      "expected_outcome": "dismissed",
       "flagged": 31,
+      "hit_rate": 1.0,
+      "hits": 31,
+      "misses": 0,
+      "not_flagged": 0,
       "scenario": "shared_template"
     },
     {
       "cases": 9,
       "dismissed": 0,
+      "expected": 9,
+      "expected_outcome": "case_opened",
       "flagged": 9,
+      "hit_rate": 1.0,
+      "hits": 9,
+      "misses": 0,
+      "not_flagged": 0,
       "scenario": "false_positive"
     },
     {
       "cases": 21,
       "dismissed": 3,
+      "expected": 28,
+      "expected_outcome": "case_opened",
       "flagged": 24,
+      "hit_rate": 0.75,
+      "hits": 21,
+      "misses": 7,
+      "not_flagged": 4,
       "scenario": "genuine_copy"
     }
   ]

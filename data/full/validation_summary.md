@@ -40,6 +40,10 @@ Result: **PASS**
 | cited_evidence_same_case | 0 | a decision cites only evidence of its own case, added no later than the decision |
 | appeal_decision_same_case | 0 | an appeal targets a decision of its own case |
 | duplicate_evidence | 0 | no case holds the same evidence (kind and description) twice |
+| lifecycle_replay | 0 | every event is allowed by rules.TRANSITIONS at the status the case had, with its recorded from/to and the chain of statuses intact |
+| transition_table_matches | 0 | the SQL legal-transition table in checks.py equals rules.TRANSITIONS |
+| flag_agreement | 0 | Python triage with each report's rule matches the v_flag view (flag, band, case, dismissal) |
+| reviewer_assignment_agreement | 0 (10 expected, auditor-labelled) | every case reviewer was free of conflicts when assigned (the auditor's REVIEWER_CONFLICT set) |
 
 ## raw score by tenth
 

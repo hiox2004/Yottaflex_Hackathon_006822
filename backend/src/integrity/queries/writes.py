@@ -19,7 +19,8 @@ def decision_ids(con: psycopg.Connection[Row], case_id: str) -> list[str]:
 
 
 def has_primary(con: psycopg.Connection[Row], case_id: str) -> bool:
-    sql = "SELECT 1 FROM case_reviewer WHERE case_id = %s AND role_in_case = 'primary'"
+    # Active primaries only: a recused primary no longer counts, so a replacement can be assigned.
+    sql = "SELECT 1 FROM v_case_active_reviewer WHERE case_id = %s AND role_in_case = 'primary'"
     return con.execute(sql, (case_id,)).fetchone() is not None
 
 
@@ -32,10 +33,13 @@ def insert_case_reviewer(con: psycopg.Connection[Row], row: Row) -> None:
 
 
 def insert_evidence(con: psycopg.Connection[Row], row: Row) -> None:
-    sql = """INSERT INTO evidence_item (evidence_id, case_id, kind, description, added_at, added_by)
+    sql = """INSERT INTO evidence_item (evidence_id, case_id, kind, description, added_at, added_by,
+                                        added_by_learner_id)
              VALUES (%(evidence_id)s, %(case_id)s, %(kind)s, %(description)s, %(added_at)s,
-                     %(added_by)s)"""
-    con.execute(sql, row)
+                     %(added_by)s, %(added_by_learner_id)s)"""
+    con.execute(
+        sql, {"added_by_learner_id": None, **row}
+    )  # staff callers leave the learner column NULL
 
 
 def insert_decision(con: psycopg.Connection[Row], row: Row, cited: list[str]) -> None:
@@ -52,9 +56,10 @@ def insert_decision(con: psycopg.Connection[Row], row: Row, cited: list[str]) ->
 
 
 def insert_appeal(con: psycopg.Connection[Row], row: Row) -> None:
-    sql = """INSERT INTO appeal (appeal_id, case_id, decision_id, grounds, filed_at, filed_by)
+    sql = """INSERT INTO appeal (appeal_id, case_id, decision_id, grounds, filed_at, filed_by,
+                                 filed_by_learner_id)
              VALUES (%(appeal_id)s, %(case_id)s, %(decision_id)s, %(grounds)s, %(filed_at)s,
-                     %(filed_by)s)"""
+                     %(filed_by)s, %(filed_by_learner_id)s)"""
     con.execute(sql, row)
 
 

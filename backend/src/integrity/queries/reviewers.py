@@ -22,11 +22,15 @@ WITH target AS (
     WHERE c2.case_id <> %(case_id)s
 )
 SELECT r.reviewer_id, r.name, r.role, r.department,
+       -- on_case uses case_reviewer (ALL rows, recused included): a recused reviewer
+       -- stays "on the case" for re-assignment and cannot be added back.
        EXISTS (SELECT 1 FROM case_reviewer cr
                WHERE cr.case_id = %(case_id)s AND cr.reviewer_id = r.reviewer_id) AS on_case,
        EXISTS (SELECT 1 FROM decision d
                WHERE d.case_id = %(case_id)s AND d.reviewer_id = r.reviewer_id) AS decided_case,
-       (EXISTS (SELECT 1 FROM case_reviewer cr
+       -- reviewed_learner_before uses the active view: a case where this reviewer recused does not
+       -- count as having reviewed the learner before. Appeal reviewers are unaffected by recusal.
+       (EXISTS (SELECT 1 FROM v_case_active_reviewer cr
                 WHERE cr.reviewer_id = r.reviewer_id
                   AND cr.case_id IN (SELECT case_id FROM other_cases))
         OR EXISTS (SELECT 1 FROM appeal a
@@ -41,6 +45,14 @@ ORDER BY r.reviewer_id
 def list_reviewers(con: psycopg.Connection[Row]) -> list[Row]:
     sql = "SELECT reviewer_id, name, role, department FROM reviewer ORDER BY reviewer_id"
     return con.execute(sql).fetchall()
+
+
+def search_reviewers(con: psycopg.Connection[Row], pattern: str, limit: int) -> list[Row]:
+    """Staff whose id, name or department matches the ILIKE pattern, in the /reviewers order."""
+    sql = """SELECT reviewer_id, name, role, department FROM reviewer
+             WHERE name ILIKE %(p)s OR reviewer_id ILIKE %(p)s OR department ILIKE %(p)s
+             ORDER BY reviewer_id LIMIT %(n)s"""
+    return con.execute(sql, {"p": pattern, "n": limit}).fetchall()
 
 
 def get_reviewer(con: psycopg.Connection[Row], reviewer_id: str) -> Row | None:

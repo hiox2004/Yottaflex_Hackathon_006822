@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from integrity.api import errors, health
-from integrity.api.routers import actions, audit, cases, queue, reference
+from integrity.api.routers import actions, admin, audit, cases, lab, queue, reference
 from integrity.config import get_settings
 
 log = logging.getLogger("integrity.api")
@@ -42,6 +42,7 @@ def create_app() -> FastAPI:
     app.middleware("http")(_log_request)
     errors.register(app)
     app.include_router(health.router, prefix="/api")
-    for router in (reference.router, queue.router, cases.router, actions.router, audit.router):
+    routers = (reference, queue, cases, actions, audit, lab, admin)
+    for router in (module.router for module in routers):
         app.include_router(router, prefix="/api")
     return app

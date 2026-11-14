@@ -7,6 +7,8 @@ from fastapi import Depends, Header
 
 from integrity import db
 from integrity.clock import Clock, SystemClock
+from integrity.errors import RuleViolation
+from integrity.models import Role
 from integrity.rules import Actor
 from integrity.services.common import Connection, load_actor
 
@@ -32,3 +34,13 @@ def get_actor(
 Con = Annotated[Connection, Depends(get_con)]
 Now = Annotated[Clock, Depends(get_clock)]
 Who = Annotated[Actor, Depends(get_actor)]
+
+
+def staff_only(actor: Who) -> Actor:
+    """Pages a learner cannot open: everything except their own queue, case and statement."""
+    if actor.role is Role.LEARNER:
+        raise RuleViolation("ROLE_NOT_ALLOWED", "Learners cannot use this page.")
+    return actor
+
+
+Staff = Annotated[Actor, Depends(staff_only)]

@@ -8,6 +8,7 @@ from collections.abc import Iterator
 
 import psycopg
 import pytest
+from tests.db_schema import quote, schema_name
 
 from integrity import db
 from integrity.dbload import SCHEMA
@@ -47,7 +48,8 @@ INSERT INTO case_event
 @pytest.fixture
 def con() -> Iterator[psycopg.Connection]:
     with db.connect() as connection:
-        connection.execute("CREATE SCHEMA scratch; SET LOCAL search_path TO scratch")
+        schema = quote(schema_name())
+        connection.execute(f"CREATE SCHEMA {schema}; SET LOCAL search_path TO {schema}")
         connection.execute(SCHEMA.read_text(encoding="utf-8"))
         connection.execute(CLEAN_CASE)
         yield connection

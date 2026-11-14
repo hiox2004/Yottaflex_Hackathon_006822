@@ -25,6 +25,9 @@ Result: **PASS**
 
 | check | violations | rule |
 |---|---|---|
+| tables_not_empty | 0 | every core table holds at least one row |
+| row_counts_match_manifest | 0 | row counts match data/starter/manifest.json (appendable tables: at least) |
+| ids_follow_scheme_nonempty | 0 | each id format is matched by at least one row |
 | report_per_submission | 0 | every submission has exactly one similarity report (1:1) |
 | rule_in_force | 0 | the report's rule was in force when the submission was made |
 | rules_do_not_overlap | 0 | rule versions have disjoint effective periods |
@@ -40,6 +43,12 @@ Result: **PASS**
 | cited_evidence_same_case | 0 | a decision cites only evidence of its own case, added no later than the decision |
 | appeal_decision_same_case | 0 | an appeal targets a decision of its own case |
 | duplicate_evidence | 0 | no case holds the same evidence (kind and description) twice |
+| recusal_has_reason | 0 | every reviewer_recused event records a non-blank reason |
+| recusal_before_decision_only | 0 | no recusal after a decision unless the case was reopened in between |
+| lifecycle_replay | 0 | every event is allowed by rules.TRANSITIONS at the status the case had, with its recorded from/to and the chain of statuses intact |
+| transition_table_matches | 0 | the SQL legal-transition table in checks.py equals rules.TRANSITIONS |
+| flag_agreement | 0 | Python triage with each report's rule matches the v_flag view (flag, band, case, dismissal), and scores on a threshold get the lower-inclusive band |
+| reviewer_conflict_rule_vs_auditor_agreement | 0 (1 agreed by all derivations) | Python rules, the auditor SQL and an independent SQL recount flag the same assignments; this checks the implementations agree, it does not prove any is right |
 
 ## raw score by tenth
 

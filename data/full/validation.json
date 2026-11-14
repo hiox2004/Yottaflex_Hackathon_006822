@@ -74,6 +74,37 @@
       "description": "no case holds the same evidence (kind and description) twice",
       "name": "duplicate_evidence",
       "violations": 0
+    },
+    {
+      "description": "every event is allowed by rules.TRANSITIONS at the status the case had, with its recorded from/to and the chain of statuses intact",
+      "examples": [],
+      "name": "lifecycle_replay",
+      "violations": 0
+    },
+    {
+      "description": "the SQL legal-transition table in checks.py equals rules.TRANSITIONS",
+      "examples": [],
+      "name": "transition_table_matches",
+      "violations": 0
+    },
+    {
+      "description": "Python triage with each report's rule matches the v_flag view (flag, band, case, dismissal)",
+      "examples": [],
+      "name": "flag_agreement",
+      "violations": 0
+    },
+    {
+      "description": "every case reviewer was free of conflicts when assigned (the auditor's REVIEWER_CONFLICT set)",
+      "examples": [
+        "CAS-2026-000088/REV-000049: SAME_DEPARTMENT",
+        "CAS-2026-000094/REV-000041: SAME_DEPARTMENT",
+        "CAS-2026-000113/REV-000025: INSTRUCTOR_OF_ASSESSMENT, SAME_DEPARTMENT",
+        "CAS-2026-000120/REV-000059: SAME_DEPARTMENT",
+        "CAS-2026-000137/REV-000048: SAME_DEPARTMENT"
+      ],
+      "expected_violations": 10,
+      "name": "reviewer_assignment_agreement",
+      "violations": 0
     }
   ],
   "counts": {

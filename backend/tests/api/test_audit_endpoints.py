@@ -28,11 +28,12 @@ def test_a_decision_made_through_the_api_adds_no_finding(api: Api) -> None:
     api.post(
         f"/cases/{case_id}/reviewers", admin, {"reviewer_id": reviewer, "role_in_case": "primary"}
     )
-    evidence = api.get(f"/cases/{case_id}", admin)["evidence"][0]["evidence_id"]
+    detail = api.get(f"/cases/{case_id}", admin)
+    matched = next(e["evidence_id"] for e in detail["evidence"] if e["kind"] == "matched_passage")
     body = {
         "outcome": "violation_confirmed",
-        "rationale": "Source traced.",
-        "cited_evidence_ids": [evidence],
+        "rationale": "Source traced to the matched passage.",
+        "cited_evidence_ids": [matched],
     }
     assert api.post(f"/cases/{case_id}/decision", reviewer, body)[0] == 200
     assert api.get("/audit/findings", admin)["counts"] == before

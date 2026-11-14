@@ -8,7 +8,7 @@ from integrity.auditor import audit
 CASE_1 = "CAS-2026-000001"
 DECISION = f"INSERT INTO decision VALUES ('DEC-{CASE_1}-01', '{CASE_1}', {{reviewer}}, '{{outcome}}', 'rationale', '2026-02-03 09:00Z')"
 EVENT = "INSERT INTO case_event (case_id, event_type, from_status, to_status, occurred_at) VALUES "
-APPEAL = f"INSERT INTO appeal VALUES ('APL-{CASE_1}-01', '{CASE_1}', 'DEC-{CASE_1}-01', 'grounds', '2026-02-04Z', 'REV-000003', {{reviewer}}, 'upheld', 'ok', '2026-02-10Z')"
+APPEAL = f"INSERT INTO appeal VALUES ('APL-{CASE_1}-01', '{CASE_1}', 'DEC-{CASE_1}-01', 'grounds', '2026-02-04Z', 'REV-000003', NULL, {{reviewer}}, 'upheld', 'ok', '2026-02-10Z')"
 CLOSE = EVENT + f"('{CASE_1}', 'case_closed', 'appeal_decided', 'closed', '2026-03-01Z')"
 
 
@@ -108,11 +108,39 @@ def test_g4_flags_closure_after_missing_or_non_independent_appeal_review(
     case_2 = add_case(con, 2, "LRN-000002", "REV-000005")
     con.execute(
         f"INSERT INTO decision VALUES ('DEC-{case_2}-01', '{case_2}', 'REV-000005', 'violation_confirmed', 'x', '2026-02-03Z');"
-        f"INSERT INTO appeal VALUES ('APL-{case_2}-01', '{case_2}', 'DEC-{case_2}-01', 'g', '2026-02-04Z', 'REV-000003', 'REV-000005', 'upheld', 'ok', '2026-02-10Z');"
+        f"INSERT INTO appeal VALUES ('APL-{case_2}-01', '{case_2}', 'DEC-{case_2}-01', 'g', '2026-02-04Z', 'REV-000003', NULL, 'REV-000005', 'upheld', 'ok', '2026-02-10Z');"
         + EVENT
         + f"('{case_2}', 'case_closed', 'appeal_decided', 'closed', '2026-03-01Z')"
     )
     assert found(con, "APPEAL_CLOSED_NO_INDEPENDENT_REVIEW") == {(case_2, f"APL-{case_2}-01")}
+
+
+RECUSE = (
+    "INSERT INTO case_event (case_id, event_type, occurred_at, actor_id, ref_id, reason) VALUES "
+    "('{case}', 'reviewer_recused', '2026-02-04Z', '{reviewer}', '{reviewer}', 'conflict of interest')"
+)
+
+
+def test_recused_conflicted_reviewer_is_not_reported(con: psycopg.Connection) -> None:
+    con.execute(
+        f"INSERT INTO case_reviewer VALUES ('{CASE_1}', 'REV-000001', 'secondary', '2026-02-03Z', 'REV-000003')"
+    )
+    assert found(con, "REVIEWER_CONFLICT") == {(CASE_1, "REV-000001")}
+    con.execute(RECUSE.format(case=CASE_1, reviewer="REV-000001"))
+    assert found(con, "REVIEWER_CONFLICT") == set()
+
+
+def test_recusal_from_an_earlier_case_removes_the_repeat_conflict(con: psycopg.Connection) -> None:
+    repeat = add_case(con, 3, "LRN-000001", "REV-000002")
+    assert found(con, "REVIEWER_CONFLICT") == {(repeat, "REV-000002")}
+    con.execute(RECUSE.format(case=CASE_1, reviewer="REV-000002"))
+    assert found(con, "REVIEWER_CONFLICT") == set()
+
+
+def test_decision_before_a_later_recusal_is_not_flagged(con: psycopg.Connection) -> None:
+    con.execute(DECISION.format(reviewer="'REV-000002'", outcome="violation_confirmed"))
+    con.execute(RECUSE.format(case=CASE_1, reviewer="REV-000002"))
+    assert found(con, "AUTO_GUILT_WITHOUT_REVIEW") == set()
 
 
 def test_audit_can_be_limited_to_one_case(con: psycopg.Connection) -> None:

@@ -4,6 +4,7 @@ import re
 
 import psycopg
 import pytest
+from tests.db_schema import schema_name
 
 from integrity.config import REPO_ROOT
 
@@ -68,6 +69,25 @@ def test_views_derive_status_flag_and_queue(con: psycopg.Connection) -> None:
     assert queue == ("review", "under_review", ["REV-000002"], None)
 
 
+def test_recusal_event_hides_the_reviewer_from_active_views(con: psycopg.Connection) -> None:
+    case_id, reviewer_id = con.execute(
+        "SELECT case_id, reviewer_id FROM case_reviewer ORDER BY case_id, reviewer_id LIMIT 1"
+    ).fetchone()
+    queue_sql = "SELECT assignee_ids FROM v_case_queue WHERE case_id = %s"
+    active_sql = "SELECT count(*) FROM v_case_active_reviewer WHERE case_id = %s"
+    assert reviewer_id in con.execute(queue_sql, (case_id,)).fetchone()[0]
+    con.execute(
+        "INSERT INTO case_event (case_id, event_type, occurred_at, actor_id, ref_id, reason)"
+        " VALUES (%s, 'reviewer_recused', now(), %s, %s, 'conflict of interest')",
+        (case_id, reviewer_id, reviewer_id),
+    )
+    assert reviewer_id not in con.execute(queue_sql, (case_id,)).fetchone()[0]
+    assert con.execute(active_sql, (case_id,)).fetchone()[0] == 0
+    # case_reviewer is insert-only: the assignment row itself is still there.
+    kept = con.execute("SELECT count(*) FROM case_reviewer WHERE case_id = %s", (case_id,))
+    assert kept.fetchone()[0] >= 1
+
+
 def test_dismissed_flag_gets_the_larger_exclusion_as_reason(con: psycopg.Connection) -> None:
     con.execute(
         "INSERT INTO submission VALUES ('SUB-2026-000002', 'LRN-000001', 'ASM-000001', 2, now(), 9)"
@@ -95,9 +115,10 @@ def test_dictionary_lists_every_column_of_every_table(con: psycopg.Connection) -
             documented.setdefault(table, set()).add(cell.group(1))
     schema = con.execute(
         "SELECT table_name, column_name FROM information_schema.columns c "
-        "WHERE table_schema = 'scratch' AND table_name IN "
+        "WHERE table_schema = %(s)s AND table_name IN "
         "(SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' "
-        "AND table_schema = 'scratch') ORDER BY 1, 2"
+        "AND table_schema = %(s)s) ORDER BY 1, 2",
+        {"s": schema_name()},
     ).fetchall()
     actual: dict[str, set[str]] = {}
     for table_name, column in schema:

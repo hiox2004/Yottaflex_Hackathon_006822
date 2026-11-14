@@ -9,8 +9,10 @@ from integrity.schemas import (
     AppealReviewerBody,
     AssignReviewerBody,
     CaseDetail,
+    CloseBody,
     DecisionBody,
     EvidenceBody,
+    RecuseBody,
     ReopenBody,
 )
 from integrity.services import appeal_service, case_service
@@ -33,6 +35,11 @@ def add_evidence(case_id: str, body: EvidenceBody, con: Con, actor: Who, clock: 
 @router.post("/cases/{case_id}/reopen")
 def reopen(case_id: str, body: ReopenBody, con: Con, actor: Who, clock: Now) -> CaseDetail:
     return case_service.reopen(con, clock, actor, case_id, body)
+
+
+@router.post("/cases/{case_id}/recuse")
+def recuse(case_id: str, body: RecuseBody, con: Con, actor: Who, clock: Now) -> CaseDetail:
+    return case_service.recuse(con, clock, actor, case_id, body)
 
 
 @router.post("/cases/{case_id}/decision")
@@ -60,5 +67,7 @@ def decide_appeal(
 
 
 @router.post("/cases/{case_id}/close")
-def close(case_id: str, con: Con, actor: Who, clock: Now) -> CaseDetail:
-    return case_service.close(con, clock, actor, case_id)
+def close(
+    case_id: str, con: Con, actor: Who, clock: Now, body: CloseBody | None = None
+) -> CaseDetail:
+    return case_service.close(con, clock, actor, case_id, body)

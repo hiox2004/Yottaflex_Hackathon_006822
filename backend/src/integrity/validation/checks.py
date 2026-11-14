@@ -17,10 +17,12 @@ EVENT_TRANSITIONS = """
     (VALUES ('case_opened', NULL, 'open'),
             ('reviewer_assigned', 'open', 'under_review'), ('reviewer_assigned', NULL, NULL),
             ('evidence_added', NULL, NULL),
+            ('reviewer_recused', NULL, NULL),
             ('decision_recorded', 'under_review', 'decided'),
             ('case_reopened', 'decided', 'under_review'),
             ('appeal_filed', 'decided', 'appealed'),
             ('appeal_reviewer_assigned', 'appealed', 'appeal_review'),
+            ('appeal_reviewer_assigned', 'appeal_review', 'appeal_review'),
             ('appeal_decided', 'appeal_review', 'appeal_decided'),
             ('case_closed', 'decided', 'closed'), ('case_closed', 'appeal_decided', 'closed'))
     AS legal(event_type, from_status, to_status)
@@ -85,12 +87,32 @@ SELECT e.case_event_id::text, e.event_type || ' ref ' || COALESCE(e.ref_id, 'NUL
 FROM case_event e WHERE
   (e.event_type = 'reviewer_assigned' AND NOT EXISTS (SELECT 1 FROM case_reviewer r
       WHERE r.case_id = e.case_id AND r.reviewer_id = e.ref_id))
+  OR (e.event_type = 'reviewer_recused' AND (NOT EXISTS (SELECT 1 FROM case_reviewer r
+      WHERE r.case_id = e.case_id AND r.reviewer_id = e.ref_id) OR e.actor_id IS DISTINCT FROM e.ref_id))
   OR (e.event_type = 'evidence_added' AND NOT EXISTS (SELECT 1 FROM evidence_item x
       WHERE x.case_id = e.case_id AND x.evidence_id = e.ref_id))
   OR (e.event_type = 'decision_recorded' AND NOT EXISTS (SELECT 1 FROM decision d
       WHERE d.case_id = e.case_id AND d.decision_id = e.ref_id))
   OR (e.event_type IN ('appeal_filed', 'appeal_reviewer_assigned', 'appeal_decided')
       AND NOT EXISTS (SELECT 1 FROM appeal a WHERE a.case_id = e.case_id AND a.appeal_id = e.ref_id))
+"""
+
+RECUSAL_REASON_SQL = """
+SELECT e.case_event_id::text, 'reviewer_recused without a reason' FROM case_event e
+WHERE e.event_type = 'reviewer_recused' AND btrim(COALESCE(e.reason, '')) = ''
+"""
+
+# A recusal is a conflict found before the decision. After a decision it is only possible once the
+# case was reopened, so the latest decision before the recusal must have a reopen after it.
+RECUSAL_AFTER_DECISION_SQL = """
+SELECT r.case_event_id::text, 'reviewer_recused after decision made at ' || last.decided_at
+FROM case_event r
+JOIN LATERAL (SELECT max(d.occurred_at) AS decided_at FROM case_event d
+              WHERE d.case_id = r.case_id AND d.event_type = 'decision_recorded'
+                AND d.occurred_at < r.occurred_at) last ON last.decided_at IS NOT NULL
+WHERE r.event_type = 'reviewer_recused'
+  AND NOT EXISTS (SELECT 1 FROM case_event o WHERE o.case_id = r.case_id AND o.event_type = 'case_reopened'
+                  AND o.occurred_at > last.decided_at AND o.occurred_at < r.occurred_at)
 """
 
 TRANSITION_CHAIN_SQL = """
@@ -236,6 +258,16 @@ CHECKS: tuple[Check, ...] = (
         "no case holds the same evidence (kind and description) twice",
         "SELECT case_id, 'duplicate ' || kind || ' evidence x' || count(*) FROM evidence_item "
         "GROUP BY case_id, kind, description HAVING count(*) > 1",
+    ),
+    Check(
+        "recusal_has_reason",
+        "every reviewer_recused event records a non-blank reason",
+        RECUSAL_REASON_SQL,
+    ),
+    Check(
+        "recusal_before_decision_only",
+        "no recusal after a decision unless the case was reopened in between",
+        RECUSAL_AFTER_DECISION_SQL,
     ),
 )
 

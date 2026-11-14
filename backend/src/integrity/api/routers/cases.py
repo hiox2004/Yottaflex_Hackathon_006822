@@ -4,7 +4,7 @@ from typing import Literal
 
 from fastapi import APIRouter
 
-from integrity.api.deps import Con, Now, Who
+from integrity.api.deps import Con, Now, Staff, Who
 from integrity.schemas import CaseDetail, EligibleReviewer, TimelineEvent
 from integrity.services import read_service
 
@@ -17,12 +17,12 @@ def case(case_id: str, con: Con, actor: Who, clock: Now) -> CaseDetail:
 
 
 @router.get("/cases/{case_id}/timeline")
-def timeline(case_id: str, con: Con, _actor: Who) -> list[TimelineEvent]:
-    return read_service.timeline(con, case_id)
+def timeline(case_id: str, con: Con, actor: Who) -> list[TimelineEvent]:
+    return read_service.timeline(con, actor, case_id)
 
 
 @router.get("/cases/{case_id}/eligible-reviewers")
 def eligible_reviewers(
-    case_id: str, con: Con, _actor: Who, purpose: Literal["case", "appeal"] = "case"
+    case_id: str, con: Con, _actor: Staff, purpose: Literal["case", "appeal"] = "case"
 ) -> list[EligibleReviewer]:
     return read_service.eligible_reviewers(con, case_id, purpose)

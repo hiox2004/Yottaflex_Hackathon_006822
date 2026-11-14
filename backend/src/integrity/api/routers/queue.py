@@ -21,9 +21,9 @@ def queue(con: Con, actor: Who, clock: Now, wanted: Annotated[QueueFilter, Query
 @router.get("/flags")
 def flags(
     con: Con,
-    _actor: Who,
+    actor: Who,
     outcome: Literal["dismissed"] = "dismissed",
     limit: Limit = 50,
     offset: Offset = 0,
 ) -> FlagPage:
-    return read_service.dismissed_flags(con, limit, offset)
+    return read_service.dismissed_flags(con, actor, limit, offset)

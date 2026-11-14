@@ -49,6 +49,7 @@ DETECTORS: dict[str, str] = {
     """,
     # An assigned reviewer teaches the assessment, shares the learner's department, or reviewed
     # an earlier case of the same learner. Reviewing a different learner is not a conflict.
+    # A reviewer who recused from the case is not a violation: the recusal is the due-process step.
     "REVIEWER_CONFLICT": CASE_CONTEXT
     + """
         SELECT cc.case_id, cr.reviewer_id, why.reasons
@@ -63,9 +64,15 @@ DETECTORS: dict[str, str] = {
                    JOIN case_context other ON other.case_id = earlier.case_id
                    WHERE earlier.reviewer_id = cr.reviewer_id AND other.learner_id = cc.learner_id
                      AND earlier.case_id <> cr.case_id
+                     AND NOT EXISTS (SELECT 1 FROM case_event e
+                                     WHERE e.case_id = earlier.case_id AND e.event_type = 'reviewer_recused'
+                                       AND e.ref_id = earlier.reviewer_id)
                      AND (earlier.assigned_at, earlier.case_id) < (cr.assigned_at, cr.case_id))
                  THEN 'already reviewed an earlier case of this learner' END) AS reasons) why
         WHERE why.reasons <> ''
+          AND NOT EXISTS (SELECT 1 FROM case_event e
+                          WHERE e.case_id = cr.case_id AND e.event_type = 'reviewer_recused'
+                            AND e.ref_id = cr.reviewer_id)
           AND (%(case_id)s::text IS NULL OR cc.case_id = %(case_id)s)
     """,
     # Evidence is newer than the latest decision before it, and the case was not reopened in between.

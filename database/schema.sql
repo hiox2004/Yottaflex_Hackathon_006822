@@ -97,6 +97,7 @@ CREATE TABLE evidence_item (
     description text NOT NULL CHECK (btrim(description) <> ''),
     added_at    timestamptz NOT NULL,
     added_by    text REFERENCES reviewer,
+    added_by_learner_id text REFERENCES learner,  -- set instead of added_by when a learner adds a statement
     CHECK (starts_with(evidence_id, 'EVD-' || case_id || '-'))
 );
 CREATE INDEX evidence_item_case_idx ON evidence_item (case_id, added_at);
@@ -127,12 +128,14 @@ CREATE TABLE appeal (
     decision_id       text NOT NULL REFERENCES decision,
     grounds           text NOT NULL CHECK (btrim(grounds) <> ''),
     filed_at          timestamptz NOT NULL,
-    filed_by          text NOT NULL REFERENCES reviewer,
+    filed_by          text REFERENCES reviewer,
+    filed_by_learner_id text REFERENCES learner,  -- exactly one of filed_by / filed_by_learner_id is set
     reviewer_id       text REFERENCES reviewer,
     outcome           text CHECK (outcome IN ('upheld', 'overturned', 'partially_upheld')),
     outcome_rationale text CHECK (btrim(outcome_rationale) <> ''),
     decided_at        timestamptz,
     CHECK (starts_with(appeal_id, 'APL-' || case_id || '-')),
+    CHECK ((filed_by IS NULL) <> (filed_by_learner_id IS NULL)),
     CHECK ((outcome IS NULL) = (outcome_rationale IS NULL) AND (outcome IS NULL) = (decided_at IS NULL))
 );
 CREATE INDEX appeal_reviewer_idx ON appeal (reviewer_id);
@@ -144,13 +147,15 @@ CREATE TABLE case_event (
     case_id       text NOT NULL REFERENCES integrity_case,
     event_type    text NOT NULL CHECK (event_type IN
                       ('case_opened', 'reviewer_assigned', 'evidence_added', 'decision_recorded', 'case_reopened',
-                       'appeal_filed', 'appeal_reviewer_assigned', 'appeal_decided', 'case_closed')),
+                       'appeal_filed', 'appeal_reviewer_assigned', 'appeal_decided', 'case_closed',
+                       'reviewer_recused')),
     from_status   text CHECK (from_status IN
                       ('open', 'under_review', 'decided', 'appealed', 'appeal_review', 'appeal_decided', 'closed')),
     to_status     text CHECK (to_status IN
                       ('open', 'under_review', 'decided', 'appealed', 'appeal_review', 'appeal_decided', 'closed')),
     occurred_at   timestamptz NOT NULL,
     actor_id      text REFERENCES reviewer,
+    actor_learner_id text REFERENCES learner,  -- set instead of actor_id when a learner acts
     ref_id        text,
     reason        text,
     CHECK (from_status IS NULL OR to_status IS NOT NULL)
@@ -204,6 +209,16 @@ LEFT JOIN LATERAL (
     ORDER BY e.occurred_at DESC, e.case_event_id DESC LIMIT 1
 ) closed ON latest.to_status = 'closed';
 
+-- Reviewers still on a case: case_reviewer rows not later recused (event 'reviewer_recused', ref_id =
+-- reviewer_id). case_reviewer stays insert-only; a recusal is a case_event that hides the row here only.
+CREATE VIEW v_case_active_reviewer AS
+SELECT cr.case_id, cr.reviewer_id, cr.role_in_case, cr.assigned_at, cr.assigned_by
+FROM case_reviewer cr
+WHERE NOT EXISTS (
+    SELECT 1 FROM case_event e
+    WHERE e.case_id = cr.case_id AND e.event_type = 'reviewer_recused' AND e.ref_id = cr.reviewer_id
+);
+
 -- A flag is a report whose raw score reaches the review threshold of its rule. Exclusions larger of the two
 -- decide the dismissal reason (a tie counts as quote_only).
 CREATE VIEW v_flag AS
@@ -226,7 +241,7 @@ SELECT c.case_id, l.learner_id, l.name AS learner_name, a.title AS assessment_ti
        score_band(r.adjusted_score, ru.log_threshold, ru.review_threshold, ru.priority_threshold) AS band,
        st.status, st.closed_at, c.opened_at,
        COALESCE((SELECT array_agg(cr.reviewer_id ORDER BY cr.assigned_at, cr.reviewer_id)
-                 FROM case_reviewer cr WHERE cr.case_id = c.case_id), '{}') AS assignee_ids,
+                 FROM v_case_active_reviewer cr WHERE cr.case_id = c.case_id), '{}') AS assignee_ids,
        CASE WHEN ap.outcome = 'overturned' THEN 'no_violation'
             WHEN ap.outcome = 'partially_upheld' THEN 'inconclusive'
             ELSE d.outcome END AS effective_outcome

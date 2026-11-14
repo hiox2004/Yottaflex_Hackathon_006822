@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import Any
 
 from integrity.errors import NotFoundError
-from integrity.models import Reviewer, Rule, Status
-from integrity.queries import cases, events, flags, reviewers
+from integrity.models import Reviewer, Role, Rule, Status
+from integrity.queries import cases, events, flags, learners, reviewers
 from integrity.rules import (
     Actor,
     Scores,
@@ -13,10 +13,12 @@ from integrity.rules import (
     allowed_actions,
     conflict_reasons,
     explain_triage,
+    guard_case_owner,
     independence_reasons,
     triage,
 )
 from integrity.schemas import (
+    ActorOut,
     AppealOut,
     AssessmentRef,
     CaseDetail,
@@ -43,6 +45,30 @@ def list_reviewers(con: Connection) -> list[Reviewer]:
 
 def list_rules(con: Connection) -> list[Rule]:
     return [Rule.model_validate(r) for r in reviewers.list_rules(con)]
+
+
+def search_actors(con: Connection, role: str, text: str, limit: int) -> list[ActorOut]:
+    """Learners or staff whose id, name or department contains `text` (any case), for the picker."""
+    escaped = text.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    pattern = f"%{escaped}%"
+    if role == "learner":
+        return [
+            ActorOut(
+                actor_id=r["learner_id"], name=r["name"], role="learner", department=r["department"]
+            )
+            for r in learners.search_learners(con, pattern, limit)
+        ]
+    return [
+        ActorOut(
+            actor_id=r["reviewer_id"], name=r["name"], role=r["role"], department=r["department"]
+        )
+        for r in reviewers.search_reviewers(con, pattern, limit)
+    ]
+
+
+def _own_scope(actor: Actor) -> str | None:
+    """A learner sees only their own cases and flags; staff see all of them (None)."""
+    return actor.reviewer_id if actor.role is Role.LEARNER else None
 
 
 def _matches(row: dict[str, Any], needs: bool, wanted: QueueFilter) -> bool:
@@ -72,16 +98,20 @@ def _counts(statuses: list[str], needs_me: int, dismissed: int) -> QueueCounts:
 def queue(con: Connection, actor: Actor, wanted: QueueFilter, now: datetime) -> QueuePage:
     """Cases newest first with the actor's needs_my_action, a page and counts over all cases."""
     rows = cases.all_facts(con)
+    if actor.role is Role.LEARNER:
+        rows = [r for r in rows if r["learner_id"] == actor.reviewer_id]
     needs = [bool(allowed_actions(actor, facts_from_row(r), now)) for r in rows]
     shown = [(r, n) for r, n in zip(rows, needs, strict=True) if _matches(r, n, wanted)]
     page = shown[wanted.offset : wanted.offset + wanted.limit]
     items = [QueueRow.model_validate({**r, "needs_my_action": n}) for r, n in page]
-    counts = _counts([r["status"] for r in rows], sum(needs), flags.count_dismissed(con))
+    counts = _counts(
+        [r["status"] for r in rows], sum(needs), flags.count_dismissed(con, _own_scope(actor))
+    )
     return QueuePage(items=items, total=len(shown), counts=counts)
 
 
-def dismissed_flags(con: Connection, limit: int, offset: int) -> FlagPage:
-    rows, total = flags.dismissed(con, limit, offset)
+def dismissed_flags(con: Connection, actor: Actor, limit: int, offset: int) -> FlagPage:
+    rows, total = flags.dismissed(con, limit, offset, _own_scope(actor))
     return FlagPage(items=[DismissedFlag.model_validate(r) for r in rows], total=total)
 
 
@@ -91,6 +121,7 @@ def case_detail(con: Connection, actor: Actor, case_id: str, now: datetime) -> C
     facts_row = cases.facts(con, case_id)
     if head is None or facts_row is None:
         raise NotFoundError(f"Case {case_id} does not exist.")
+    guard_case_owner(actor, head["learner_id"])
     rule = Rule.model_validate(head)
     scores = Scores(head["raw_score"], head["quoted_score"], head["template_score"])
     facts = facts_from_row(facts_row)
@@ -130,9 +161,11 @@ def case_detail(con: Connection, actor: Actor, case_id: str, now: datetime) -> C
     )
 
 
-def timeline(con: Connection, case_id: str) -> list[TimelineEvent]:
-    if cases.header(con, case_id) is None:
+def timeline(con: Connection, actor: Actor, case_id: str) -> list[TimelineEvent]:
+    head = cases.header(con, case_id)
+    if head is None:
         raise NotFoundError(f"Case {case_id} does not exist.")
+    guard_case_owner(actor, head["learner_id"])
     return [TimelineEvent.model_validate(r) for r in events.timeline(con, case_id)]
 
 

@@ -7,7 +7,10 @@ from typing import Any
 
 import psycopg
 
+from integrity.validation.agreement import run_agreement_checks
 from integrity.validation.checks import CHECKS, Violation, run_checks
+from integrity.validation.replay import run_replay_checks
+from integrity.validation.sanity import run_sanity_checks
 
 TABLES = (
     "reviewer", "learner", "assessment", "integrity_rule", "submission", "similarity_report",
@@ -42,13 +45,26 @@ DISTRIBUTIONS = {
 }  # fmt: skip
 
 
+def _extra_checks(con: psycopg.Connection[Any]) -> list[dict[str, Any]]:
+    """Replay and agreement results, shaped like the SQL checks (name, description, violations)."""
+    return run_replay_checks(con) + run_agreement_checks(con)
+
+
 def summarize(
-    con: psycopg.Connection[Any], violations: list[Violation] | None = None
+    con: psycopg.Connection[Any],
+    violations: list[Violation] | None = None,
+    scale: str | None = None,
 ) -> dict[str, Any]:
-    """Row counts, per-check pass/fail and distribution tables; pass `violations` to reuse a run."""
+    """Row counts, per-check results and distribution tables; pass `violations` to reuse a run.
+
+    Sanity checks come first (they fail on an empty or wrong-sized database, where the row checks
+    pass vacuously). The top-level `violations` counts unexpected failures across every check,
+    so 0 means clean.
+    """
     violations = run_checks(con) if violations is None else violations
     counts = {t: int(con.execute(f"SELECT count(*) FROM {t}").fetchone()[0]) for t in TABLES}  # type: ignore[index]
-    checks = [
+    checks: list[dict[str, Any]] = run_sanity_checks(con, scale)
+    checks += [
         {
             "name": c.name,
             "description": c.description,
@@ -56,6 +72,7 @@ def summarize(
         }
         for c in CHECKS
     ]
+    checks += _extra_checks(con)
     distributions = {
         name: {str(label): int(n) for label, n in con.execute(sql)}
         for name, sql in DISTRIBUTIONS.items()
@@ -64,9 +81,16 @@ def summarize(
     return {
         "counts": counts,
         "checks": checks,
-        "violations": len(violations),
+        "violations": sum(int(c["violations"]) for c in checks),
         "distributions": distributions,
     }
+
+
+def failing_checks(summary: dict[str, Any]) -> list[str]:
+    """Names to report on a failed run: checks with violations, or every check if none ran at all."""
+    if not summary["checks"]:
+        return ["no checks ran"]
+    return [c["name"] for c in summary["checks"] if c["violations"]]
 
 
 def render_markdown(summary: dict[str, Any]) -> str:
@@ -76,9 +100,14 @@ def render_markdown(summary: dict[str, Any]) -> str:
     lines += [f"Result: **{verdict}**", "", "## Row counts", "", "| table | rows |", "|---|---|"]
     lines += [f"| {name} | {n} |" for name, n in summary["counts"].items()]
     lines += ["", "## Checks", "", "| check | violations | rule |", "|---|---|---|"]
-    lines += [
-        f"| {c['name']} | {c['violations']} | {c['description']} |" for c in summary["checks"]
-    ]
+    for c in summary["checks"]:
+        expected = c.get("expected_violations")
+        count = (
+            f"{c['violations']} ({expected} agreed by all derivations)"
+            if expected
+            else c["violations"]
+        )
+        lines.append(f"| {c['name']} | {count} | {c['description']} |")
     for name, table in summary["distributions"].items():
         lines += ["", f"## {name.replace('_', ' ')}", "", "| value | count |", "|---|---|"]
         lines += [f"| {label} | {n} |" for label, n in table.items()] or ["| (none) | 0 |"]

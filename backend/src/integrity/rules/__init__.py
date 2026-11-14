@@ -14,9 +14,13 @@ from integrity.rules.lifecycle import (
     allowed_actions,
     check_action,
     guard,
+    guard_appeal_reassignment,
     guard_assignment,
+    guard_case_owner,
     guard_cited_evidence,
+    guard_confirmed_violation,
     guard_evidence_kind,
+    guard_recusal_reason,
 )
 from integrity.rules.triage import Scores, Triage, band_for, explain_triage, triage
 
@@ -34,9 +38,13 @@ __all__ = [
     "conflict_reasons",
     "explain_triage",
     "guard",
+    "guard_appeal_reassignment",
     "guard_assignment",
+    "guard_case_owner",
     "guard_cited_evidence",
+    "guard_confirmed_violation",
     "guard_evidence_kind",
+    "guard_recusal_reason",
     "independence_reasons",
     "is_independent",
     "triage",

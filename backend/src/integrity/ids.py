@@ -26,6 +26,13 @@ def learner_id(n: int) -> str:
     return f"LRN-{n:06d}"
 
 
+def actor_columns(actor_id: str) -> tuple[str | None, str | None]:
+    """(staff id, learner id) for an actor column pair: a learner id goes to the learner column."""
+    if actor_id.startswith("LRN-"):
+        return None, actor_id
+    return actor_id, None
+
+
 def assessment_id(n: int) -> str:
     return f"ASM-{n:06d}"
 

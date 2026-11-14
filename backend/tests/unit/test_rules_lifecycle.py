@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from integrity.errors import RuleViolation
-from integrity.models import Action, DecisionOutcome, Role, Status
+from integrity.models import Action, DecisionOutcome, EvidenceKind, Role, Status
 from integrity.rules import (
     TRANSITIONS,
     Actor,
@@ -20,6 +20,7 @@ from integrity.rules import (
     guard_cited_evidence,
     is_independent,
 )
+from integrity.rules.lifecycle import guard_confirmed_violation, guard_recusal_reason
 
 NOW = datetime(2026, 10, 1, tzinfo=UTC)
 ADMIN = Actor("REV-000001", Role.ACADEMIC_ADMINISTRATOR)
@@ -88,6 +89,59 @@ def test_only_a_confirmed_violation_can_be_appealed() -> None:
     assert raised.value.code == "NOT_ADVERSE"
 
 
+SUPPORTING = "Passages match an uncited source."  # long enough for a confirmed violation
+
+
+@pytest.mark.parametrize(
+    ("outcome", "rationale", "kinds", "code"),
+    [
+        (
+            DecisionOutcome.VIOLATION_CONFIRMED,
+            "  too short  ",
+            [EvidenceKind.MATCHED_PASSAGE],
+            "RATIONALE_TOO_SHORT",
+        ),
+        (
+            DecisionOutcome.VIOLATION_CONFIRMED,
+            SUPPORTING,
+            [EvidenceKind.QUOTE_CITATION],
+            "NO_INCRIMINATING_EVIDENCE",
+        ),
+        (
+            DecisionOutcome.VIOLATION_CONFIRMED,
+            SUPPORTING,
+            [EvidenceKind.TEMPLATE_MATCH, EvidenceKind.LEARNER_STATEMENT],
+            "NO_INCRIMINATING_EVIDENCE",
+        ),
+    ],
+)
+def test_confirmed_violation_needs_a_finding_and_an_incriminating_item(
+    outcome: DecisionOutcome, rationale: str, kinds: list[EvidenceKind], code: str
+) -> None:
+    with pytest.raises(RuleViolation) as raised:
+        guard_confirmed_violation(outcome, rationale, kinds)
+    assert raised.value.code == code
+
+
+@pytest.mark.parametrize(
+    ("outcome", "kinds"),
+    [
+        (DecisionOutcome.NO_VIOLATION, [EvidenceKind.QUOTE_CITATION]),
+        (DecisionOutcome.INCONCLUSIVE, [EvidenceKind.LEARNER_STATEMENT]),
+    ],
+)
+def test_other_outcomes_keep_the_looser_rule(
+    outcome: DecisionOutcome, kinds: list[EvidenceKind]
+) -> None:
+    guard_confirmed_violation(outcome, "x", kinds)
+
+
+def test_a_confirmed_violation_passes_with_a_finding_and_a_source_reference() -> None:
+    guard_confirmed_violation(
+        DecisionOutcome.VIOLATION_CONFIRMED, SUPPORTING, [EvidenceKind.SOURCE_REFERENCE]
+    )
+
+
 def test_evidence_after_a_decision_needs_a_reopen() -> None:
     with pytest.raises(RuleViolation) as raised:
         guard(Action.ADD_EVIDENCE, REVIEWER, facts(Status.DECIDED), NOW)
@@ -102,11 +156,77 @@ def test_close_is_refused_while_the_appeal_is_unresolved_or_the_window_is_open()
     with pytest.raises(RuleViolation) as window:
         guard(Action.CLOSE, ADMIN, recent, NOW)
     assert window.value.code == "APPEAL_WINDOW_OPEN"
-    assert window.value.message == "Appeal window open until 12 Oct 2026."
+    assert window.value.message == (
+        "The learner can still appeal until 12 Oct 2026. Close early only with a recorded waiver."
+    )
+
+
+def test_a_non_adverse_decision_closes_at_once_for_the_administrator() -> None:
+    for outcome in (DecisionOutcome.NO_VIOLATION, DecisionOutcome.INCONCLUSIVE):
+        recent = facts(Status.DECIDED, latest_outcome=outcome, latest_decision_at=NOW)
+        assert guard(Action.CLOSE, ADMIN, recent, NOW) is Status.CLOSED
+    for actor in (REVIEWER, SUPPORT):
+        recent = facts(Status.DECIDED, latest_decision_at=NOW - timedelta(days=3))
+        with pytest.raises(RuleViolation) as refused:
+            guard(Action.CLOSE, actor, recent, NOW)
+        assert refused.value.code == "ROLE_NOT_ALLOWED"
+
+
+def test_a_waiver_lets_the_administrator_close_an_adverse_case_inside_the_window() -> None:
+    recent = facts(Status.DECIDED, latest_decision_at=NOW - timedelta(days=3))
+    assert guard(Action.CLOSE, ADMIN, recent, NOW, waived=True) is Status.CLOSED
+
+
+def test_only_an_administrator_adverse_case_inside_the_window_is_waivable() -> None:
+    recent = facts(Status.DECIDED, latest_decision_at=NOW - timedelta(days=3))
+    checks = {c.action: c for c in action_checks(ADMIN, recent, NOW)}
+    assert checks[Action.CLOSE].waivable
+    assert not checks[Action.CLOSE].allowed
+    assert not any(c.waivable for c in action_checks(REVIEWER, recent, NOW))
+    assert not any(c.waivable for c in action_checks(SUPPORT, recent, NOW))
+    after = facts(Status.DECIDED, latest_decision_at=NOW - timedelta(days=15))
+    assert not any(c.waivable for c in action_checks(ADMIN, after, NOW))
+    clean = facts(
+        Status.DECIDED,
+        latest_outcome=DecisionOutcome.NO_VIOLATION,
+        latest_decision_at=NOW - timedelta(days=3),
+    )
+    assert not any(c.waivable for c in action_checks(ADMIN, clean, NOW))
+    assert Action.CLOSE in allowed_actions(ADMIN, clean, NOW)
+
+
+def test_appeal_is_refused_from_the_window_end_and_allowed_just_before() -> None:
+    decided = NOW - timedelta(days=14)  # the 14-day window ends exactly at NOW
+    closed = facts(Status.DECIDED, latest_decision_at=decided)
+    with pytest.raises(RuleViolation) as raised:
+        guard(Action.FILE_APPEAL, SUPPORT, closed, NOW)
+    assert raised.value.code == "APPEAL_WINDOW_CLOSED"
+    assert raised.value.message == (
+        "The appeal window closed on 1 Oct 2026. Appeals can no longer be filed."
+    )
+    last_moment = NOW - timedelta(seconds=1)
+    assert guard(Action.FILE_APPEAL, SUPPORT, closed, last_moment) is Status.APPEALED
+
+
+def test_closed_appeal_window_is_refused_in_action_checks() -> None:
+    late = facts(Status.DECIDED, latest_decision_at=NOW - timedelta(days=15))
+    assert Action.FILE_APPEAL not in allowed_actions(SUPPORT, late, NOW)
+    check = next(c for c in action_checks(SUPPORT, late, NOW) if c.action is Action.FILE_APPEAL)
+    assert [r.code for r in check.reasons] == ["APPEAL_WINDOW_CLOSED"]
+
+
+def test_admin_can_reassign_the_appeal_reviewer_while_it_is_under_review() -> None:
+    held = facts(Status.APPEAL_REVIEW, appeal_filed=True, appeal_reviewer_id="REV-000010")
+    assert guard(Action.ASSIGN_APPEAL_REVIEWER, ADMIN, held, NOW) is Status.APPEAL_REVIEW
+    with pytest.raises(RuleViolation) as raised:
+        guard(Action.ASSIGN_APPEAL_REVIEWER, SUPPORT, held, NOW)
+    assert raised.value.code == "ROLE_NOT_ALLOWED"
 
 
 def test_close_after_the_window_leads_to_closed() -> None:
     assert guard(Action.CLOSE, ADMIN, facts(Status.DECIDED), NOW) is Status.CLOSED
+    late = facts(Status.DECIDED, latest_decision_at=NOW - timedelta(days=15))
+    assert guard(Action.CLOSE, ADMIN, late, NOW) is Status.CLOSED
 
 
 def test_unassigned_reviewer_cannot_decide_and_the_wrong_role_is_refused() -> None:
@@ -133,7 +253,11 @@ def test_action_checks_cover_every_action_and_match_allowed_actions() -> None:
     checks = action_checks(REVIEWER, under_review, NOW)
     assert [c.action for c in checks] == list(Action)
     assert all(c.reasons for c in checks if not c.allowed)
-    assert allowed_actions(REVIEWER, under_review, NOW) == [Action.ADD_EVIDENCE, Action.DECIDE]
+    assert allowed_actions(REVIEWER, under_review, NOW) == [
+        Action.ADD_EVIDENCE,
+        Action.DECIDE,
+        Action.RECUSE,
+    ]
 
 
 def test_decision_must_cite_evidence_of_this_case() -> None:
@@ -149,3 +273,37 @@ def test_role_that_cannot_review_is_a_validation_error_not_a_conflict() -> None:
         guard_assignment(reasons, "REV-000009", "CONFLICT_OF_INTEREST")
     assert raised.value.code == "VALIDATION_ERROR"
     assert "ROLE_CANNOT_REVIEW" in raised.value.details["reasons"]
+
+
+def test_only_an_assigned_reviewer_can_step_aside_while_under_review() -> None:
+    assert guard(Action.RECUSE, REVIEWER, facts(Status.UNDER_REVIEW), NOW) is Status.UNDER_REVIEW
+    outsider = Actor("REV-000008", Role.ACADEMIC_REVIEWER)
+    with pytest.raises(RuleViolation) as unassigned:
+        guard(Action.RECUSE, outsider, facts(Status.UNDER_REVIEW), NOW)
+    assert unassigned.value.code == "NOT_ASSIGNED"
+    for actor in (ADMIN, SUPPORT):
+        with pytest.raises(RuleViolation) as role:
+            guard(Action.RECUSE, actor, facts(Status.UNDER_REVIEW), NOW)
+        assert role.value.code == "ROLE_NOT_ALLOWED"
+
+
+@pytest.mark.parametrize("status", [Status.OPEN, Status.DECIDED, Status.CLOSED])
+def test_recusal_is_refused_outside_under_review(status: Status) -> None:
+    with pytest.raises(RuleViolation) as raised:
+        guard(Action.RECUSE, REVIEWER, facts(status), NOW)
+    assert raised.value.code == "INVALID_TRANSITION"
+
+
+def test_blank_recusal_reason_is_refused_with_a_plain_message() -> None:
+    guard_recusal_reason("Known to the learner's family.")
+    with pytest.raises(RuleViolation) as raised:
+        guard_recusal_reason("   ")
+    assert raised.value.code == "RECUSAL_REASON_REQUIRED"
+
+
+def test_on_case_reason_can_be_ignored_at_decision_time() -> None:
+    on_case = conflict(on_case=True)
+    assert [r.code for r in conflict_reasons(on_case)] == ["ALREADY_ON_CASE"]
+    assert conflict_reasons(on_case, ignore_on_case=True) == []
+    clashing = conflict(on_case=True, reviewer_department="Law")
+    assert [r.code for r in conflict_reasons(clashing, ignore_on_case=True)] == ["SAME_DEPARTMENT"]

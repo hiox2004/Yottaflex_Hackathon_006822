@@ -21,37 +21,51 @@ class ConflictFacts:
     decided_case: bool
 
 
-def conflict_reasons(facts: ConflictFacts) -> list[Reason]:
-    """Why this person cannot be assigned to review the case (empty when conflict-free)."""
+def conflict_reasons(facts: ConflictFacts, ignore_on_case: bool = False) -> list[Reason]:
+    """Why this person cannot be assigned to review the case (empty when conflict-free).
+
+    `ignore_on_case` drops the ALREADY_ON_CASE reason: a reviewer who is on the case re-checks
+    the conflicts that matter at decision time without counting their own assignment.
+    """
     who = facts.reviewer_id
     reasons: list[Reason] = []
     if facts.reviewer_role not in REVIEWER_ROLES:
         reasons.append(
-            Reason(code=ConflictCode.ROLE_CANNOT_REVIEW, message=f"{who} cannot review cases.")
+            Reason(
+                code=ConflictCode.ROLE_CANNOT_REVIEW,
+                message=f"{who} is not an instructor or academic reviewer. "
+                "Choose one of them to review this case.",
+            )
         )
     if facts.assessment_instructor_id == who:
         reasons.append(
             Reason(
                 code=ConflictCode.INSTRUCTOR_OF_ASSESSMENT,
-                message=f"{who} teaches this assessment.",
+                message=f"{who} teaches this assessment, so choose a different reviewer.",
             )
         )
     if facts.reviewer_department == facts.learner_department:
         reasons.append(
             Reason(
-                code=ConflictCode.SAME_DEPARTMENT, message=f"{who} is in the learner's department."
+                code=ConflictCode.SAME_DEPARTMENT,
+                message=f"{who} is in the learner's department. "
+                "Choose a reviewer from another department.",
             )
         )
     if facts.reviewed_learner_before:
         reasons.append(
             Reason(
                 code=ConflictCode.REVIEWED_LEARNER_BEFORE,
-                message=f"{who} reviewed another case of this learner.",
+                message=f"{who} already reviewed another case for this learner. "
+                "Choose a reviewer who has not handled it.",
             )
         )
-    if facts.on_case:
+    if facts.on_case and not ignore_on_case:
         reasons.append(
-            Reason(code=ConflictCode.ALREADY_ON_CASE, message=f"{who} is already on this case.")
+            Reason(
+                code=ConflictCode.ALREADY_ON_CASE,
+                message=f"{who} is already a reviewer on this case.",
+            )
         )
     return reasons
 
@@ -63,7 +77,8 @@ def independence_reasons(facts: ConflictFacts) -> list[Reason]:
         reasons.append(
             Reason(
                 code=ConflictCode.DECIDED_THIS_CASE,
-                message=f"{facts.reviewer_id} decided this case.",
+                message=f"{facts.reviewer_id} decided this case, so cannot review its appeal. "
+                "Choose another reviewer.",
             )
         )
     return reasons
