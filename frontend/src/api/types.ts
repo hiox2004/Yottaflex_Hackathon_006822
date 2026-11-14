@@ -1,5 +1,5 @@
 // Hand-written mirror of docs/api-contract.md v1.1. Keep in step with the contract, never with the backend code.
-export type Role = 'instructor' | 'academic_reviewer' | 'academic_administrator' | 'support_staff';
+export type Role = 'instructor' | 'academic_reviewer' | 'academic_administrator' | 'support_staff' | 'learner';
 export type Band = 'no_action' | 'log_only' | 'review' | 'priority_review';
 export type Status =
   | 'open'
@@ -28,6 +28,7 @@ export type AllowedAction =
   | 'add_evidence'
   | 'reopen'
   | 'decide'
+  | 'recuse'
   | 'file_appeal'
   | 'assign_appeal_reviewer'
   | 'decide_appeal'
@@ -41,7 +42,8 @@ export type EventType =
   | 'appeal_filed'
   | 'appeal_reviewer_assigned'
   | 'appeal_decided'
-  | 'case_closed';
+  | 'case_closed'
+  | 'reviewer_recused';
 
 export interface Reviewer {
   reviewer_id: string;
@@ -96,6 +98,8 @@ export interface ActionCheck {
   action: AllowedAction;
   allowed: boolean;
   reasons: { code: string; message: string }[];
+  /** Only on the close check: an administrator may close early by waiving the appeal window (with a reason). */
+  waivable?: boolean;
 }
 
 export interface CaseDetail {
@@ -149,6 +153,7 @@ export interface TimelineEvent {
   to_status: Status | null;
   ref_id: string | null;
   reason: string | null;
+  detail?: string | null;
 }
 
 export interface EligibleReviewer extends Reviewer {
@@ -186,18 +191,27 @@ export interface QueuePageData extends Page<QueueRow> {
   counts: QueueCounts;
 }
 
-/** Provisional: the backend has not yet proposed final shapes for /audit/metrics and /audit/validation. */
+/** Shapes match the backend's /audit/metrics and /audit/validation responses. */
 export interface AuditMetrics {
   dataset_hash: string;
   auditor: { issue_type: IssueType; precision: number; recall: number; f1: number; labelled: number }[];
   triage: { scenario: string; cases: number; flagged: number; dismissed: number }[];
 }
 
+export interface ValidationCheck {
+  name: string;
+  description: string;
+  /** Passed when violations is 0. The server does not send a passed flag. */
+  violations: number;
+}
+
 export interface ValidationSummary {
   dataset_hash: string;
   counts: Record<string, number>;
-  checks: { name: string; passed: boolean; violations: number }[];
-  distributions: { title: string; rows: { label: string; count: number }[] }[];
+  checks: ValidationCheck[];
+  /** Keyed by distribution name, then by bucket label, e.g. cases_by_band: { review: 234 }. */
+  distributions: Record<string, Record<string, number>>;
+  violations: number;
 }
 
 export interface ApiErrorBody {

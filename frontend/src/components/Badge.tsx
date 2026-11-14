@@ -14,38 +14,39 @@ import {
 } from 'lucide-react';
 import type { Band, Status } from '../api/types';
 import { BAND_LABEL, STATUS_LABEL } from '../labels';
+import { Badge, type Tone } from './ui/badge';
 
-const STATUS_VIEW: Record<Status, { icon: LucideIcon; tone: string }> = {
-  open: { icon: CircleDot, tone: 'info' },
-  under_review: { icon: Search, tone: 'warn' },
+const STATUS_VIEW: Record<Status, { icon: LucideIcon; tone: Tone }> = {
+  open: { icon: CircleDot, tone: 'primary' },
+  under_review: { icon: Search, tone: 'warning' },
   decided: { icon: Gavel, tone: 'neutral' },
-  appealed: { icon: Scale, tone: 'warn' },
-  appeal_review: { icon: Scale, tone: 'warn' },
+  appealed: { icon: Scale, tone: 'warning' },
+  appeal_review: { icon: Scale, tone: 'warning' },
   appeal_decided: { icon: ShieldCheck, tone: 'neutral' },
-  closed: { icon: Lock, tone: 'muted' },
+  closed: { icon: Lock, tone: 'neutral' },
 };
 
-const BAND_VIEW: Record<Band, { icon: LucideIcon; tone: string }> = {
-  priority_review: { icon: TriangleAlert, tone: 'fail' },
-  review: { icon: Flag, tone: 'warn' },
-  log_only: { icon: FileText, tone: 'muted' },
-  no_action: { icon: Minus, tone: 'muted' },
+const BAND_VIEW: Record<Band, { icon: LucideIcon; tone: Tone }> = {
+  priority_review: { icon: TriangleAlert, tone: 'danger' },
+  review: { icon: Flag, tone: 'warning' },
+  log_only: { icon: FileText, tone: 'neutral' },
+  no_action: { icon: Minus, tone: 'neutral' },
 };
 
 export function StatusBadge({ status }: { status: Status }) {
   const { icon: Icon, tone } = STATUS_VIEW[status];
   return (
-    <span className={`badge tone-${tone}`}>
+    <Badge tone={tone} className="gap-1">
       <Icon size={14} aria-hidden /> {STATUS_LABEL[status]}
-    </span>
+    </Badge>
   );
 }
 
 export function BandBadge({ band }: { band: Band }) {
   const { icon: Icon, tone } = BAND_VIEW[band];
   return (
-    <span className={`badge tone-${tone}`}>
+    <Badge tone={tone} className="gap-1">
       <Icon size={14} aria-hidden /> {BAND_LABEL[band]}
-    </span>
+    </Badge>
   );
 }

@@ -1,5 +1,8 @@
 node_modules
 dist
-.git
-.cache
 coverage
+.git
+.env
+.env.*
+!.env.example
+*.log

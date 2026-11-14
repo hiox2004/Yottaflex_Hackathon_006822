@@ -1,6 +1,7 @@
 // Fixture router: answers GET paths from hand-written data when VITE_USE_FIXTURES is not "false".
 import { ApiError } from '../errors';
 import type { Page } from '../types';
+import { adminWorkload } from './admin';
 import { auditMetrics, validationSummary } from './audit';
 import { caseDetails, eligibleFor, findings, timelineFor } from './cases';
 import { dismissedFlags, queueRows } from './queue';
@@ -45,6 +46,7 @@ export function fixtureGet(path: string): unknown {
   const query = new URLSearchParams(search);
   if (route === '/reviewers') return reviewers;
   if (route === '/rules') return rules;
+  if (route === '/admin/workload') return adminWorkload;
   if (route === '/queue') return queue(query);
   if (route === '/flags') return paged(dismissedFlags, query);
   const found = route.match(/^\/cases\/([^/]+)(\/timeline|\/eligible-reviewers)?$/);

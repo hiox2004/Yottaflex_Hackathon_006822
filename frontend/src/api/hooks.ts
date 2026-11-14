@@ -10,6 +10,7 @@ import type {
   Page,
   QueuePageData,
   Reviewer,
+  Role,
   Rule,
   TimelineEvent,
   ValidationSummary,
@@ -25,6 +26,23 @@ function qs(params: object): string {
 export const useReviewers = (actorId: string) =>
   useQuery({ queryKey: ['reviewers', actorId], queryFn: () => apiGet<Reviewer[]>('/reviewers') });
 
+/** A person who can act in the app: a staff member or a learner (contract: GET /api/actors, no actor header needed). */
+export interface Actor {
+  actor_id: string;
+  name: string;
+  role: Role;
+  department: string;
+}
+
+/** Search for switching the acting person. Runs only once the query has text; the server returns at most `limit` rows. */
+export const useActors = (role: 'learner' | 'staff', q: string, limit = 20) =>
+  useQuery({
+    queryKey: ['actors', role, q, limit],
+    queryFn: () => apiGet<Actor[]>(`/actors${qs({ role, q: q.trim(), limit })}`),
+    enabled: q.trim() !== '',
+    placeholderData: keepPreviousData,
+  });
+
 export const useRules = (actorId: string) =>
   useQuery({ queryKey: ['rules', actorId], queryFn: () => apiGet<Rule[]>('/rules') });
 
@@ -39,14 +57,15 @@ export const useQueue = (actorId: string, filters: QueueFilters, limit: number) 
   useQuery({
     queryKey: ['queue', actorId, filters, limit],
     queryFn: () => apiGet<QueuePageData>(`/queue${qs({ ...filters, limit })}`),
-    placeholderData: keepPreviousData,
+    // Keep the old rows only for the same person: after a switch, show loading instead of the previous actor's rows.
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === actorId ? prev : undefined),
   });
 
 export const useDismissedFlags = (actorId: string, limit: number) =>
   useQuery({
     queryKey: ['flags', actorId, limit],
     queryFn: () => apiGet<Page<DismissedFlag>>(`/flags${qs({ outcome: 'dismissed', limit })}`),
-    placeholderData: keepPreviousData,
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === actorId ? prev : undefined),
   });
 
 export const useCase = (actorId: string, caseId: string) =>
@@ -80,9 +99,23 @@ export function useCaseWrite(actorId: string, caseId: string) {
     mutationFn: ({ path, body }: { path: string; body: unknown }) => apiPost<CaseDetail>(`/cases/${caseId}${path}`, body),
     onSuccess: (detail) => {
       client.setQueryData(['case', actorId, caseId], detail);
-      for (const key of [['timeline', actorId, caseId], ['findings', actorId], ['eligible', actorId, caseId], ['queue', actorId]]) {
+      // Audit and admin pages read the same case data, so they refresh now rather than after their 15 s stale time.
+      for (const key of [
+        ['timeline', actorId, caseId],
+        ['findings'],
+        ['eligible', actorId, caseId],
+        ['queue'],
+        ['audit-metrics'],
+        ['audit-validation'],
+        ['admin-workload'], // the key admin.ts actually uses (useWorkload); there is no ['workload'] key
+      ]) {
         void client.invalidateQueries({ queryKey: key });
       }
+    },
+    // A refused write (409 etc.) leaves the server state unchanged: re-read the case so buttons match reality.
+    onError: () => {
+      void client.invalidateQueries({ queryKey: ['case', actorId, caseId] });
+      void client.invalidateQueries({ queryKey: ['timeline', actorId, caseId] });
     },
   });
 }

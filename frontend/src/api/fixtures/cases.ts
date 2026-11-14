@@ -1,8 +1,10 @@
 // Fixtures: a case detail for every queue row, built per status, plus timelines, eligible reviewers and findings.
+import { EVIDENCE_LABEL } from '../../labels';
 import type {
   ActionCheck,
   AllowedAction,
   CaseDetail,
+  DecisionOutcome,
   EligibleReviewer,
   Finding,
   QueueRow,
@@ -18,6 +20,7 @@ const ACTIONS: AllowedAction[] = [
   'add_evidence',
   'reopen',
   'decide',
+  'recuse',
   'file_appeal',
   'assign_appeal_reviewer',
   'decide_appeal',
@@ -25,6 +28,7 @@ const ACTIONS: AllowedAction[] = [
 ];
 
 const WHY: Record<AllowedAction, { code: string; message: string }> = {
+  recuse: { code: 'NOT_ASSIGNED', message: 'Only an assigned reviewer or instructor can step aside, and only while the case is under review.' },
   assign_reviewer: { code: 'INVALID_TRANSITION', message: 'A reviewer can only be assigned before a decision.' },
   add_evidence: { code: 'REOPEN_REQUIRED', message: 'This case is decided. Reopen it before adding evidence, so the change is on the record.' },
   reopen: { code: 'INVALID_TRANSITION', message: 'Only a decided case can be reopened.' },
@@ -32,27 +36,43 @@ const WHY: Record<AllowedAction, { code: string; message: string }> = {
   file_appeal: { code: 'INVALID_TRANSITION', message: 'An appeal can be filed only after a decision, once.' },
   assign_appeal_reviewer: { code: 'INVALID_TRANSITION', message: 'There is no appeal waiting for a reviewer.' },
   decide_appeal: { code: 'NOT_APPEAL_REVIEWER', message: 'Only the independent appeal reviewer can decide this appeal.' },
-  close: { code: 'APPEAL_WINDOW_OPEN', message: 'Appeal window open until 25 Nov 2026. A case cannot close before it ends.' },
+  close: { code: 'APPEAL_WINDOW_OPEN', message: 'Appeal window open until 25 Nov 2026. Close early only with a recorded waiver.' },
 };
 
 const ALLOWED_BY_STATUS: Record<Status, AllowedAction[]> = {
   open: ['assign_reviewer'],
-  under_review: ['add_evidence', 'decide'],
+  under_review: ['add_evidence', 'decide', 'recuse'],
   decided: ['reopen', 'file_appeal'],
   appealed: ['assign_appeal_reviewer'],
-  appeal_review: ['decide_appeal'],
+  // An administrator can reassign the appeal reviewer while the appeal is in review.
+  appeal_review: ['decide_appeal', 'assign_appeal_reviewer'],
   appeal_decided: ['close'],
   closed: [],
 };
 
-const checks = (status: Status): ActionCheck[] =>
+/** Decided cases whose outcome is cleared: they can be closed at once. The others are violations (see waivableClose). */
+const CLEARED_IDS = ['CAS-2026-000009', 'CAS-2026-000011'];
+
+/** Action checks for one case. A decided violation inside its appeal window is refused but waivable for an administrator. */
+const checks = (allowedNow: AllowedAction[], waivableClose: boolean): ActionCheck[] =>
   ACTIONS.map((action) => {
-    const allowed = ALLOWED_BY_STATUS[status].includes(action);
-    return { action, allowed, reasons: allowed ? [] : [WHY[action]] };
+    const allowed = allowedNow.includes(action);
+    const waivable = action === 'close' && waivableClose ? { waivable: true } : {};
+    return { action, allowed, reasons: allowed ? [] : [WHY[action]], ...waivable };
   });
 
 function buildCase(row: QueueRow): CaseDetail {
   const rule = rules[0]!;
+  // Under review with no active reviewer (every reviewer stepped aside): only an administrator can assign one.
+  const noReviewer = row.status === 'under_review' && row.case_id.endsWith('015');
+  const cleared = CLEARED_IDS.includes(row.case_id);
+  const outcome = cleared ? 'no_violation' : 'violation_confirmed';
+  // A decided cleared case can be closed now; a decided violation is refused until its appeal window ends (or is waived).
+  const allowedNow: AllowedAction[] = noReviewer
+    ? ['assign_reviewer', 'add_evidence']
+    : row.status === 'decided' && cleared
+      ? ['reopen', 'close']
+      : ALLOWED_BY_STATUS[row.status];
   const exclusions = row.adjusted_score > 0.85 ? 0.04 : 0.12;
   const quoted = Math.round(exclusions * 0.7 * 1000) / 1000;
   const template = Math.round((exclusions - quoted) * 1000) / 1000;
@@ -85,7 +105,7 @@ function buildCase(row: QueueRow): CaseDetail {
         { step: 'outcome', text: 'A case is opened for a human reviewer. A flag is not a finding.', value: 'case_opened', threshold: null },
       ],
     },
-    reviewers: primary && row.status !== 'open'
+    reviewers: primary && row.status !== 'open' && !noReviewer
       ? [{ reviewer_id: primary.reviewer_id, name: primary.name, role_in_case: 'primary', assigned_at: '2026-11-11T09:00:00Z' }]
       : [],
     evidence: row.status === 'open' ? [] : [
@@ -94,7 +114,7 @@ function buildCase(row: QueueRow): CaseDetail {
     ],
     decisions: decided ? [{
       decision_id: `DEC-${base}-001`,
-      outcome: row.status === 'closed' && row.case_id.endsWith('011') ? 'no_violation' : 'violation_confirmed',
+      outcome,
       rationale: 'The matched passages are substantial, uncited and not covered by the quotation or template exclusions.',
       reviewer_id: primary?.reviewer_id ?? null,
       decided_at: '2026-10-25T15:00:00Z',
@@ -109,25 +129,31 @@ function buildCase(row: QueueRow): CaseDetail {
       outcome_rationale: overturned ? 'The handout was issued to the class; the passages are explained.' : null,
       decided_at: overturned ? '2026-11-05T12:00:00Z' : null,
     } : null,
-    effective_outcome: !decided ? null : overturned ? 'no_violation' : row.case_id.endsWith('011') ? 'no_violation' : 'violation_confirmed',
-    allowed_actions: ALLOWED_BY_STATUS[row.status],
-    action_checks: checks(row.status),
+    effective_outcome: !decided ? null : overturned ? 'no_violation' : outcome,
+    allowed_actions: allowedNow,
+    action_checks: checks(allowedNow, row.status === 'decided' && !cleared),
   };
 }
 
 export const caseDetails: CaseDetail[] = queueRows.map(buildCase);
 
+const DECISION_DETAIL: Record<DecisionOutcome, string> = {
+  no_violation: 'No violation found',
+  violation_confirmed: 'Violation confirmed',
+  inconclusive: 'Inconclusive',
+};
+
 export function timelineFor(detail: CaseDetail): TimelineEvent[] {
   let id = 0;
   const event = (e: Partial<TimelineEvent> & Pick<TimelineEvent, 'event_type' | 'occurred_at'>): TimelineEvent => ({
-    event_id: ++id, actor_id: null, actor_name: null, from_status: null, to_status: null, ref_id: null, reason: null, ...e,
+    event_id: ++id, actor_id: null, actor_name: null, from_status: null, to_status: null, ref_id: null, reason: null, detail: null, ...e,
   });
   const staff = detail.reviewers[0];
   const out = [event({ event_type: 'case_opened', occurred_at: detail.opened_at, to_status: 'open', reason: 'Triage: adjusted score reached the review gate' })];
-  if (staff) out.push(event({ event_type: 'reviewer_assigned', occurred_at: '2026-11-11T09:00:00Z', actor_id: 'REV-000021', actor_name: 'Helen Marsh', from_status: 'open', to_status: 'under_review', ref_id: staff.reviewer_id }));
-  detail.evidence.forEach((e) => out.push(event({ event_type: 'evidence_added', occurred_at: e.added_at, actor_id: staff?.reviewer_id ?? null, actor_name: staff?.name ?? null, ref_id: e.evidence_id })));
-  detail.decisions.forEach((d) => out.push(event({ event_type: 'decision_recorded', occurred_at: d.decided_at, actor_id: staff?.reviewer_id ?? null, actor_name: staff?.name ?? null, from_status: 'under_review', to_status: 'decided', ref_id: d.decision_id, reason: d.rationale })));
-  if (detail.appeal) out.push(event({ event_type: 'appeal_filed', occurred_at: detail.appeal.filed_at, actor_id: 'REV-000031', actor_name: 'Tomás Vidal', from_status: 'decided', to_status: 'appealed', ref_id: detail.appeal.appeal_id, reason: detail.appeal.grounds }));
+  if (staff) out.push(event({ event_type: 'reviewer_assigned', occurred_at: '2026-11-11T09:00:00Z', actor_id: 'REV-000021', actor_name: 'Helen Marsh', from_status: 'open', to_status: 'under_review', ref_id: staff.reviewer_id, detail: `${staff.name} as ${staff.role_in_case}` }));
+  detail.evidence.forEach((e) => out.push(event({ event_type: 'evidence_added', occurred_at: e.added_at, actor_id: staff?.reviewer_id ?? null, actor_name: staff?.name ?? null, ref_id: e.evidence_id, detail: `${EVIDENCE_LABEL[e.kind]}: ${e.description}` })));
+  detail.decisions.forEach((d) => out.push(event({ event_type: 'decision_recorded', occurred_at: d.decided_at, actor_id: staff?.reviewer_id ?? null, actor_name: staff?.name ?? null, from_status: 'under_review', to_status: 'decided', ref_id: d.decision_id, reason: d.rationale, detail: DECISION_DETAIL[d.outcome] })));
+  if (detail.appeal) out.push(event({ event_type: 'appeal_filed', occurred_at: detail.appeal.filed_at, actor_id: 'REV-000031', actor_name: 'Tomás Vidal', from_status: 'decided', to_status: 'appealed', ref_id: detail.appeal.appeal_id, reason: detail.appeal.grounds, detail: `Grounds: ${detail.appeal.grounds}` }));
   if (detail.closed_at) out.push(event({ event_type: 'case_closed', occurred_at: detail.closed_at, actor_id: 'REV-000021', actor_name: 'Helen Marsh', to_status: 'closed' }));
   return out;
 }

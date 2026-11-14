@@ -1,0 +1,91 @@
+// Test Lab triage packs: 5 packs of similarity scores with the CORRECT outcome in `expect`.
+// Each expect was computed with the backend rule (integrity.rules.triage), not guessed.
+// Rule: log 0.30, review 0.60, priority 0.85; adjusted = raw - quoted - template; flag when raw >= 0.60.
+import type { LabCase } from '../api/lab';
+
+export const triagePacks: { id: string; title: string; description: string; cases: LabCase[] }[] = [
+  {
+    id: "threshold-boundaries",
+    title: "Threshold boundaries",
+    description: "Exact 0.30 / 0.60 / 0.85 gates and 0.001 either side.",
+    cases: [
+      { id: "T-001", title: "Raw exactly at the log gate 0.300", scores: { raw: 0.3, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "log_only" } },
+      { id: "T-002", title: "Raw 0.001 below the log gate", scores: { raw: 0.299, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "no_action" } },
+      { id: "T-003", title: "Raw 0.001 above the log gate", scores: { raw: 0.301, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "log_only" } },
+      { id: "T-004", title: "Raw exactly at the review gate 0.600", scores: { raw: 0.6, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "T-005", title: "Raw 0.001 below the review gate", scores: { raw: 0.599, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "log_only" } },
+      { id: "T-006", title: "Raw 0.001 above the review gate", scores: { raw: 0.601, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "T-007", title: "Raw exactly at the priority gate 0.850", scores: { raw: 0.85, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "T-008", title: "Raw 0.001 below the priority gate", scores: { raw: 0.849, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "T-009", title: "Raw 0.001 above the priority gate", scores: { raw: 0.851, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "T-010", title: "Adjusted exactly at the review gate 0.600 after exclusions", scores: { raw: 0.7, quoted: 0.1, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+    ],
+  },
+  {
+    id: "quotes-and-templates",
+    title: "Quotes and templates",
+    description: "Legitimate quotes, shared templates, both, ties, and exclusions that cross the gate.",
+    cases: [
+      { id: "Q-001", title: "Legitimate quote: adjusted 0.52, dismissed", scores: { raw: 0.72, quoted: 0.2, template: 0.0 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "quote_only" } },
+      { id: "Q-002", title: "Shared template: adjusted 0.53, dismissed", scores: { raw: 0.75, quoted: 0.02, template: 0.2 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "template_match" } },
+      { id: "Q-003", title: "Quote and template together: adjusted 0.65, still reviewed", scores: { raw: 0.9, quoted: 0.15, template: 0.1 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "Q-004", title: "Tie on exclusions goes to quote_only", scores: { raw: 0.9, quoted: 0.2, template: 0.2 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "quote_only" } },
+      { id: "Q-005", title: "Template larger than quote: template_match", scores: { raw: 0.7, quoted: 0.05, template: 0.15 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "template_match" } },
+      { id: "Q-006", title: "Exclusions exactly bring adjusted to 0.600: case opens", scores: { raw: 0.7, quoted: 0.05, template: 0.05 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "Q-007", title: "Template pushes adjusted to 0.590: dismissed", scores: { raw: 0.7, quoted: 0.05, template: 0.06 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "template_match" } },
+      { id: "Q-008", title: "Quote drops adjusted to exactly 0.600: case opens", scores: { raw: 0.85, quoted: 0.25, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "Q-009", title: "Quote drops adjusted to 0.590: dismissed quote_only", scores: { raw: 0.95, quoted: 0.3, template: 0.06 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "quote_only" } },
+      { id: "Q-010", title: "Template drops adjusted to 0.590 on a larger raw: template_match", scores: { raw: 0.8, quoted: 0.1, template: 0.11 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "template_match" } },
+    ],
+  },
+  {
+    id: "clear-false-alarms-and-copies",
+    title: "Clear false alarms and clear copies",
+    description: "Obvious low scores, obvious copies, and maximum scores with or without exclusions.",
+    cases: [
+      { id: "C-001", title: "No overlap at all", scores: { raw: 0.1, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "no_action" } },
+      { id: "C-002", title: "Ordinary low similarity, logged only", scores: { raw: 0.45, quoted: 0.05, template: 0.02 }, expect: { is_flag: false, opens_case: false, band: "log_only" } },
+      { id: "C-003", title: "Genuine copy at 0.95", scores: { raw: 0.95, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "C-004", title: "Maximum raw, no exclusions", scores: { raw: 1.0, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "C-005", title: "Maximum raw, heavy quoting leaves 0.50", scores: { raw: 1.0, quoted: 0.4, template: 0.1 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "quote_only" } },
+      { id: "C-006", title: "Zero everywhere", scores: { raw: 0.0, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "no_action" } },
+      { id: "C-007", title: "Genuine copy at 0.98 with a small quote", scores: { raw: 0.98, quoted: 0.02, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "C-008", title: "False positive: quoted essay, adjusted 0.26", scores: { raw: 0.66, quoted: 0.3, template: 0.1 }, expect: { is_flag: true, opens_case: false, band: "no_action", dismissal_reason: "quote_only" } },
+      { id: "C-009", title: "Low raw fully explained by quoting", scores: { raw: 0.05, quoted: 0.05, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "no_action" } },
+    ],
+  },
+  {
+    id: "priority-vs-review-band",
+    title: "Priority vs review band",
+    description: "Adjusted scores just under, at, and above 0.85, and high raw scores with heavy exclusions.",
+    cases: [
+      { id: "P-001", title: "Adjusted 0.849 stays in review", scores: { raw: 0.9, quoted: 0.05, template: 0.001 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "P-002", title: "Adjusted exactly 0.850 is priority", scores: { raw: 0.9, quoted: 0.05, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "P-003", title: "Adjusted 0.851 is priority", scores: { raw: 0.93, quoted: 0.07, template: 0.009 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "P-004", title: "High raw, heavy quoting: dismissed quote_only", scores: { raw: 0.95, quoted: 0.4, template: 0.2 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "quote_only" } },
+      { id: "P-005", title: "Raw 1.0 with exclusions leaves 0.70: review", scores: { raw: 1.0, quoted: 0.2, template: 0.1 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "P-006", title: "Raw 1.0 with light exclusions: exactly 0.85 priority", scores: { raw: 1.0, quoted: 0.1, template: 0.05 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "P-007", title: "Raw 0.99 with exclusions leaves 0.84: review", scores: { raw: 0.99, quoted: 0.1, template: 0.05 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "P-008", title: "Almost all quoted: adjusted 0, quote_only", scores: { raw: 0.9, quoted: 0.9, template: 0.0 }, expect: { is_flag: true, opens_case: false, band: "no_action", dismissal_reason: "quote_only" } },
+      { id: "P-009", title: "Adjusted exactly 0.850 with a template: priority", scores: { raw: 0.86, quoted: 0.0, template: 0.01 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "P-010", title: "Raw exactly 0.850 with no exclusions: priority", scores: { raw: 0.85, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+    ],
+  },
+  {
+    id: "edge-numbers",
+    title: "Edge numbers",
+    description: "Three-decimal values around the gates, zeros and ones, to check float and Decimal handling.",
+    cases: [
+      { id: "E-001", title: "0.599 is not a flag", scores: { raw: 0.599, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "log_only" } },
+      { id: "E-002", title: "0.600 is a flag and opens a case", scores: { raw: 0.6, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "E-003", title: "0.601 is a flag and opens a case", scores: { raw: 0.601, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "E-004", title: "All zeros", scores: { raw: 0.0, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "no_action" } },
+      { id: "E-005", title: "Raw 1 fully quoted: adjusted 0, quote_only", scores: { raw: 1.0, quoted: 1.0, template: 0.0 }, expect: { is_flag: true, opens_case: false, band: "no_action", dismissal_reason: "quote_only" } },
+      { id: "E-006", title: "Raw 1 with no exclusions: priority", scores: { raw: 1.0, quoted: 0.0, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "priority_review" } },
+      { id: "E-007", title: "0.300 exactly: log only", scores: { raw: 0.3, quoted: 0.0, template: 0.0 }, expect: { is_flag: false, opens_case: false, band: "log_only" } },
+      { id: "E-008", title: "0.700 minus 0.100 is exactly 0.600: case opens", scores: { raw: 0.7, quoted: 0.1, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "E-009", title: "0.850 minus 0.250 is exactly 0.600: case opens", scores: { raw: 0.85, quoted: 0.25, template: 0.0 }, expect: { is_flag: true, opens_case: true, band: "review" } },
+      { id: "E-010", title: "0.999 minus 0.399 minus 0.100 is 0.500: dismissed quote_only", scores: { raw: 0.999, quoted: 0.399, template: 0.1 }, expect: { is_flag: true, opens_case: false, band: "log_only", dismissal_reason: "quote_only" } },
+    ],
+  },
+];
