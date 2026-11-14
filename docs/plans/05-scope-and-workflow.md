@@ -27,6 +27,9 @@ verification, README, DEMO.md and rehearsal.
 Kept: `v_flag` view, flag on raw score and case on the adjusted band, append-only history, four anomalies with decoys, ground truth kept apart,
 live auditor, triage-versus-scenario evaluation, `allowed_actions`, 401/403 role checks, Rules page and a small Audit page.
 **Added for transparency (contract v1.1):** `flag.explanation` steps, `action_checks` with reasons, `needs_my_action`, findings filtered by case.
+**Frontend dependency allowlist (overrides the "plain CSS, no UI kit" wording in plan 03 for commodity parts):** `react-router-dom`, `@tanstack/react-query`,
+headless Radix primitives only as used (dialog, tabs, tooltip, popover, toast), and `lucide-react`. Exact versions, one-line reason per dependency in the status file.
+Signature components stay hand-drawn in plain CSS; no pre-styled UI kit, no state or chart library.
 Metrics on the Audit page: auditor precision/recall/F1 per issue type, triage-versus-scenario, validation summary.
 
 ## 3. Tracks, owners and milestones (three worker tabs plus this orchestrator tab)
