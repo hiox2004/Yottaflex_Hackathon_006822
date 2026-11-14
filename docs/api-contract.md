@@ -1,4 +1,4 @@
-# API contract v1 (frozen)
+# API contract v1.1 (frozen)
 
 Owned by the orchestrator tab. Backend implements it, frontend consumes it. Changes only through a status-file request
 ([05-scope-and-workflow.md](plans/05-scope-and-workflow.md) section 5). Scope cuts there apply: no versions, no cursors, no request ids.
@@ -46,7 +46,7 @@ Owned by the orchestrator tab. Backend implements it, frontend consumes it. Chan
 | POST `/cases/{id}/appeal/reviewer` | assign independent appeal reviewer | administrator | `{reviewer_id}` | `CaseDetail` |
 | POST `/cases/{id}/appeal/outcome` | decide the appeal | the appeal reviewer | `{outcome, rationale}` | `CaseDetail` |
 | POST `/cases/{id}/close` | close the case | administrator | `{}` | `CaseDetail` |
-| GET `/audit/findings` | auditor run live on the database | any | | `{counts: {issue_type: n}, findings: Finding[]}` |
+| GET `/audit/findings?case_id=` | auditor run live on the database; optional filter to one case | any | | `{counts: {issue_type: n}, findings: Finding[]}` |
 | GET `/audit/metrics`, `/audit/validation` | evaluation and validation summary files | any | | provisional, see below |
 
 ## Shapes (TypeScript notation)
@@ -55,7 +55,8 @@ type Reviewer = { reviewer_id: string; name: string; role: Role; department: str
 type Rule = { rule_id: string; version: number; log_threshold: number; review_threshold: number; priority_threshold: number;
               appeal_window_days: number; effective_from: string; effective_to: string | null };
 type QueueRow = { case_id: string; learner_id: string; learner_name: string; assessment_title: string; adjusted_score: number;
-                  band: Band; status: Status; assignee_ids: string[]; opened_at: string };
+                  band: Band; status: Status; assignee_ids: string[]; opened_at: string;
+                  needs_my_action: boolean };      // true when the requesting actor has at least one allowed action on the case
 type DismissedFlag = { similarity_report_id: string; submission_id: string; learner_id: string; raw_score: number;
                        quoted_score: number; template_score: number; adjusted_score: number; dismissal_reason: DismissalReason };
 type CaseDetail = {
@@ -63,7 +64,8 @@ type CaseDetail = {
   learner: { learner_id: string; name: string; department: string };
   assessment: { assessment_id: string; title: string; instructor_id: string };
   flag: { similarity_report_id: string; rule: Rule; raw_score: number; quoted_score: number; template_score: number;
-          adjusted_score: number; band: Band };
+          adjusted_score: number; band: Band;
+          explanation: ExplainStep[] };            // how this report became a flag and then a case, in order
   reviewers: { reviewer_id: string; name: string; role_in_case: "primary" | "secondary"; assigned_at: string }[];
   evidence: { evidence_id: string; kind: EvidenceKind; description: string; added_at: string; added_by: string | null }[];
   decisions: { decision_id: string; outcome: DecisionOutcome; rationale: string; reviewer_id: string | null;
@@ -71,14 +73,30 @@ type CaseDetail = {
   appeal: null | { appeal_id: string; grounds: string; filed_at: string; reviewer_id: string | null;
                    outcome: AppealOutcome | null; outcome_rationale: string | null; decided_at: string | null };
   effective_outcome: DecisionOutcome | null;      // latest decision, adjusted by a decided appeal
-  allowed_actions: AllowedAction[];               // for the requesting actor, right now
+  allowed_actions: AllowedAction[];               // for the requesting actor, right now (actions whose check is allowed)
+  action_checks: ActionCheck[];                   // every action with its verdict and plain-language reasons
 };
 type TimelineEvent = { event_id: number; event_type: EventType; occurred_at: string; actor_id: string | null; actor_name: string | null;
                        from_status: Status | null; to_status: Status | null; ref_id: string | null; reason: string | null }; // actor null = system
 type EligibleReviewer = Reviewer & { eligible: boolean; reasons: { code: ConflictCode; message: string }[] };
 type Finding = { issue_type: IssueType; case_id: string; entity_id: string; detail: string };
+type ExplainStep = { step: "raw_score" | "exclusions" | "adjusted_score" | "band" | "outcome";
+                     text: string;                       // plain language, e.g. "Raw score 0.71 is at or above the review gate 0.60, so this is a flag."
+                     value: number | string | null; threshold: number | null };
+type ActionCheck = { action: AllowedAction; allowed: boolean;
+                     reasons: { code: string; message: string }[] };   // reasons empty when allowed; codes reuse the error codes
 ```
-`allowed_actions` is the only source of what the UI may offer. The UI never re-implements a rule; it shows the server's `message`.
+`action_checks` (and `allowed_actions`, its allowed subset) is the only source of what the UI may offer. A disallowed action is shown disabled with the
+server's reason (for example `APPEAL_WINDOW_OPEN`: "Appeal window open until 25 Nov 2026"). The UI never re-implements a rule; it shows the server's `message`.
+
+**Fairness gates.** Four gates per case, shown from `GET /audit/findings?case_id=`: a gate is `fail` when a finding of its issue type exists, `ok` when the
+case has reached the stage it checks and none exists, `n/a` before that stage (no decision yet for gates 1 and 3, no appeal for gate 4).
+| Gate (UI label) | Issue type | Stage it applies from |
+|---|---|---|
+| Human reviewed | `AUTO_GUILT_WITHOUT_REVIEW` | a decision exists |
+| No conflict of interest | `REVIEWER_CONFLICT` | a reviewer is assigned |
+| Evidence on record | `EVIDENCE_AFTER_DECISION_NO_HISTORY` | a decision exists |
+| Independent appeal | `APPEAL_CLOSED_NO_INDEPENDENT_REVIEW` | an appeal exists |
 **Provisional (backend proposes final shapes in its status file by M3):** `/audit/metrics` (auditor precision/recall/F1 per issue type,
 triage versus scenario, dataset hash) and `/audit/validation` (counts, per-check pass/fail, distribution tables, dataset hash).
 Until then the frontend uses fixtures for these two.

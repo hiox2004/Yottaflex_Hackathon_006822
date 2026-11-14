@@ -6,8 +6,10 @@ Frontend and backend can be built in parallel by separate sessions (tabs). Each 
 subagents. We want speed and good code quality without burning tokens.
 
 ## Decision
-- Two worker tabs (backend, frontend) plus an orchestrator tab, with strict folder ownership, one frozen API contract, status files
-  and commits limited to a tab's own paths ([05-scope-and-workflow.md](../plans/05-scope-and-workflow.md)).
+- Three worker tabs (database, backend, frontend) plus an orchestrator tab, with strict folder ownership, one frozen API contract, status files,
+  a separate Postgres database per tab so loads never collide, and commits limited to a tab's own paths ([05-scope-and-workflow.md](../plans/05-scope-and-workflow.md)).
+- The database tab owns the schema, loader, validator, auditor and dictionary. Those are SQL-centric, on the critical path, and the auditor is more
+  independent of the generator when a different tab writes it.
 - In each worker tab the main model (Sonnet) leads. It designs, owns the contract and rules logic, integrates and reviews diffs.
 - A tab may delegate to Haiku subagents only when the chunk is (1) large and mechanical (roughly 150+ lines), (2) described by a spec
   shorter than the work, (3) checkable by a command (tests, lint, typecheck, build), and (4) not a design or rules decision. At most two at a time.
