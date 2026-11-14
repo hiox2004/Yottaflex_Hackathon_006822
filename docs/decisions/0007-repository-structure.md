@@ -7,11 +7,12 @@ intertwine, a layout a newcomer can navigate, and a lean way of working that doe
 every small change.
 
 ## Decision
-- Top-level folders by tier and purpose: `backend/`, `frontend/`, `database/`, `data/`, `docs/`, `scripts/`, `prompts/`.
+- Top-level folders by tier and purpose: `backend/`, `frontend/`, `database/`, `data/`, `docs/`, `prompts/`. Everything local and
+  non-submission lives in one ignored `_template/` folder, and all tool caches go to one ignored `.cache/`, to keep the root small.
 - `backend/` and `frontend/` are independent projects with their own tooling; the HTTP API is their only contract.
 - Backend uses a `src/` layout with layers `api → services → repositories → db`, pure `rules/`, shared `domain/`, and
   separate `datagen/`, `validation/`, `auditor/` and optional `ai/` packages.
-- Shared lint config (`ruff.toml`) at the root because Python also lives in `scripts/`; project config in `backend/pyproject.toml`.
+- Shared lint config (`ruff.toml`) at the root because Python also lives in `prompts/`; project config in `backend/pyproject.toml`.
 - Tests are few, concise and behaviour-focused, split into `unit/` (nothing running) and `integration/` (needs the database).
   They run at checkpoints (end of a build step, before a commit that closes a requirement, before release), not after each edit.
   CI runs them on every push so local runs can stay infrequent.

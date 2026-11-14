@@ -1,9 +1,10 @@
-# Shared lint/format config for all Python in the repo (backend/ and scripts/).
+# Shared lint/format config for all Python in the repo (backend/ and prompts/).
 line-length = 100
 target-version = "py311"
 src = ["backend/src"]
+cache-dir = ".cache/ruff"
 # The local working template is git-ignored and must never be linted or reformatted.
-extend-exclude = ["starter", "tools", "kb", "research", ".claude"]
+extend-exclude = ["_template", ".claude"]
 
 [lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]

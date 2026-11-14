@@ -14,8 +14,7 @@ frontend/    React + Vite app (own package.json; talks to the backend only over 
 database/    PostgreSQL schema and notes                                           -> database/README.md
 data/        generated seed data (starter, full) and isolated ground truth         -> data/README.md
 docs/        architecture, requirements, decision records
-scripts/     small repo utilities (e.g. prompt-log export)
-prompts/     prompt log
+prompts/     prompt log and its export script
 .github/     CI
 docker-compose.yml   database tier
 ```
@@ -59,4 +58,4 @@ Optional: `pre-commit install` for lint and hygiene hooks on commit.
 
 - [docs/architecture.md](docs/architecture.md), [docs/requirements.md](docs/requirements.md)
 - [docs/decisions/](docs/decisions/README.md): what we decided, why, and the alternatives
-- [prompts/](prompts/README.md): prompt log, exported from session transcripts with `python scripts/export_prompts.py`
+- [prompts/](prompts/README.md): prompt log, exported from session transcripts with `python prompts/export_prompts.py`

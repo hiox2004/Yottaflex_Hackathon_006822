@@ -1,16 +1,13 @@
 # ---- Local tooling / working template: not part of the submission ----
-/kb/
-/tools/
-/research/
-/starter/
+/_template/
 /.claude/
 /CLAUDE.md
-/brief.md
 # Raw prompt export contains pasted problem-statement text. Review/redact it, then add it deliberately (git add -f).
 /prompts/prompts.md
 
 # ---- Python ----
 .venv/
+.cache/
 __pycache__/
 *.py[cod]
 .pytest_cache/

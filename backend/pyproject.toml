@@ -33,10 +33,11 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra -p no:cacheprovider"
 # tests/unit needs nothing running. tests/integration needs the database: docker compose up -d db
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
+cache_dir = "../.cache/mypy"
 files = ["src/integrity"]
