@@ -6,7 +6,7 @@ The API, services, validator and auditor must not reference it at all.
 
 from pathlib import Path
 
-PKG = Path(__file__).resolve().parents[1] / "integrity"
+PKG = Path(__file__).resolve().parents[2] / "src" / "integrity"
 NEEDLES = ("ground_truth", "groundtruth")
 
 

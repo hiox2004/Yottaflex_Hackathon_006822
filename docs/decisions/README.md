@@ -11,6 +11,7 @@ Numbered, never deleted. If a decision changes, add a new record that supersedes
 | [0004](0004-where-rules-are-enforced.md) | Structural rules in the database, business rules in code | Accepted |
 | [0005](0005-id-scheme.md) | ID scheme for Case and IntegrityRule | Proposed (needs confirmation) |
 | [0006](0006-repository-scope.md) | What is and is not in the public repository | Accepted |
+| [0007](0007-repository-structure.md) | Repository structure and working method (checkpoint testing) | Accepted |
 
 ## Template
 

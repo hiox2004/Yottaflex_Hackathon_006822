@@ -33,7 +33,6 @@ frontend/dist/
 # ---- Generated scratch (final datasets under data/ ARE tracked; scratch is not) ----
 /data/tmp/
 /data/_scratch/
-ground_truth_local/
 
 # ---- OS / editor ----
 .DS_Store

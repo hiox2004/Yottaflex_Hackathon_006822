@@ -3,48 +3,60 @@
 End-to-end workflow for similarity flags, evidence, conflict-free reviewer assignment, append-only case timelines and
 appeals with due process. A flag triggers **human review, never automatic guilt**.
 
-**Status:** foundations in place (database tier, backend skeleton, CI). Schema, generator, validator and auditor are next;
-see [requirements.md](requirements.md) for the tracked checklist.
+**Status:** foundations in place. Schema, generator, validator and auditor are next; progress is tracked in
+[docs/requirements.md](docs/requirements.md).
 
-## Architecture (three tiers)
+## Repository layout
 
-| Tier | Technology | Where |
-|---|---|---|
-| Frontend | React + Vite | `frontend/` (built after the data and rules are verified) |
-| Backend | FastAPI, Pydantic v2 | `backend/integrity/` |
-| Database | PostgreSQL 16 (Docker) | `docker-compose.yml`, `db/` |
+```
+backend/     FastAPI service + deterministic data tooling (own pyproject, tests)   -> backend/README.md
+frontend/    React + Vite app (own package.json; talks to the backend only over HTTP) -> frontend/README.md
+database/    PostgreSQL schema and notes                                           -> database/README.md
+data/        generated seed data (starter, full) and isolated ground truth         -> data/README.md
+docs/        architecture, requirements, decision records
+scripts/     small repo utilities (e.g. prompt-log export)
+prompts/     prompt log
+.github/     CI
+docker-compose.yml   database tier
+```
+
+| Tier | Technology |
+|---|---|
+| Frontend | React + Vite |
+| Backend | FastAPI, Pydantic v2 |
+| Database | PostgreSQL 16 (Docker) |
 
 Everything that matters is deterministic Python/SQL. An optional local-model "case brief" may be added last; it is off by
-default and never writes data. See [docs/decisions/](docs/decisions/) for why each choice was made.
+default and never writes data. [docs/decisions/](docs/decisions/README.md) records why each choice was made.
 
 ## Quick start
 
-Requires Docker, Python 3.11+.
+Requires Docker and Python 3.11+.
 
 ```bash
-docker compose up -d db                  # start PostgreSQL on localhost:5433
+docker compose up -d db                       # PostgreSQL on localhost:5433
 python -m venv .venv
-.venv/Scripts/pip install -e ".[dev]"    # Windows; use .venv/bin/pip on macOS/Linux
+.venv/Scripts/pip install -e "backend[dev]"   # Windows; .venv/bin/pip on macOS/Linux
 cp .env.example .env
-.venv/Scripts/uvicorn integrity.main:app --app-dir backend --reload
-# http://localhost:8000/health
+cd backend && ../.venv/Scripts/uvicorn integrity.main:app --reload    # http://localhost:8000/health
 ```
 
-## Development checks
+## Quality checks
+
+Run at **checkpoints** (end of a build step, before closing a requirement, before release), not after every edit.
+CI runs everything on each push.
 
 ```bash
-ruff check . && ruff format --check .   # lint + formatting
-mypy                                     # strict type check
-pytest                                   # unit + integration (needs the db container)
-pytest -m "not integration"              # unit tests only
+ruff check . && ruff format --check .         # from the repo root
+cd backend && mypy                            # strict type check
+cd backend && pytest tests/unit               # fast, nothing running
+cd backend && pytest                          # unit + integration (needs the db container)
 ```
 
-CI runs the same checks against a Postgres service on every push and pull request.
-Optional: `pre-commit install` to run lint and hygiene hooks before each commit.
+Optional: `pre-commit install` for lint and hygiene hooks on commit.
 
 ## Documentation
 
-- [docs/](docs/README.md): architecture and reference
-- [docs/decisions/](docs/decisions/README.md): decision records (what, why, alternatives)
+- [docs/architecture.md](docs/architecture.md), [docs/requirements.md](docs/requirements.md)
+- [docs/decisions/](docs/decisions/README.md): what we decided, why, and the alternatives
 - [prompts/](prompts/README.md): prompt log, exported from session transcripts with `python scripts/export_prompts.py`
-- [requirements.md](requirements.md): requirement matrix, ambiguity log, assumptions
