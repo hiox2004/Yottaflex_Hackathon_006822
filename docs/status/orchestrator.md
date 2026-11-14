@@ -2,6 +2,22 @@
 
 Every tab reads this file at the start of each milestone. Newest first. Contract is now v1.2.
 
+## Update 16:40 (contract v1.3)
+8. **Audit shapes are final** (adopted from the frontend's types, now in the contract): `AuditMetrics` and `ValidationSummary`. Database tab: make `summarize(con)` return exactly `counts`, `checks` (`name`, `passed`, `violations`) and `distributions` (`title`, `rows` of `label`, `count`). Backend: add `dataset_hash` and serve the files; `triage` rows come from your eval. `GET /queue` accepts `status` as a comma-separated list.
+9. **CI was red** because the datagen `S311` exemption in `ruff.toml` made the inline `noqa: S311` an unused-noqa error (RUF100). Fixed in `ruff.toml` (RUF100 ignored for datagen); the inline `noqa` may stay. With lint passing, mypy and the tests now run in CI: fix anything they show in your own paths.
+10. **Frontend:** M2 to M4 done early. Remaining: one screenshot check of the action dialogs and the Audit page (light, dark, 400 px) with the same headless Chrome; fix obvious problems once. Then stop and wait: the user will tell you when the backend is up for the live integration pass. Do not poll.
+
+## Schema review (orchestrator, read-only, schema.sql at e2095de)
+Verdict: matches the DB plan, the cuts and the contract; no blockers. The 13 tables, id CHECKs, generated `adjusted_score`, append-only triggers, nullable `decision.reviewer_id` (G1),
+`v_flag` (raw-score flag, case iff adjusted reaches the review threshold, tie goes to `quote_only`), `v_case_status` and `v_case_queue` all line up with what the API and UI need. Findings:
+1. **Medium, database tab (validator): do NOT reconcile `evidence_item` rows against `evidence_added` events.** The G3 anomaly is defined as evidence added after the decision with no reopen event and no `evidence_added` event,
+   so that check would fail the validator on injected data. Reconcile only decisions to `decision_recorded` events, and appeals to `appeal_filed` / `appeal_decided` events. The auditor's G3 detector stays "evidence newer than the latest decision with no reopen in between"; its decoy has both a reopen and an `evidence_added` event.
+2. **Medium, database and backend tabs: departments are free text** and G2 depends on text equality. Datagen must use one fixed list of 6 or more department names (decision 2); the validator reports staff per department and fails on a department that appears nowhere in the list (typo guard).
+3. **Low, validator: cross-table facts the schema cannot enforce.** `appeal.decision_id` belongs to the same case and is `violation_confirmed`; `decision_evidence` cites evidence of the same case; `decision.reviewer_id` (when present) has role instructor or academic_reviewer; `case_reviewer.assigned_by` is an administrator; evidence by `learner_statement` is added by support staff or null; `appeal.filed_by` is support staff or administrator.
+4. **Low, validator and backend:** `appeal` is the only mutable business table (reviewer, outcome, rationale, decided_at). The API may update only those columns, each with a matching `case_event`; the validator checks outcome set iff an `appeal_decided` event exists.
+5. **Low, dictionary:** effective dates exist only on `integrity_rule` (`effective_from`, `effective_to`); other entities carry `*_at` timestamps and derived status. Say so in `DATA_DICTIONARY.md` (requirement B5) rather than adding columns.
+6. **Info, backend:** UPDATE or DELETE on a history table raises an integrity-constraint error (class 23). The API should never trigger it, but map it to a 500, not a 409. `needs_my_action` and `counts.needs_me` need `allowed_actions` evaluated for every open case: load facts in bulk, not per row.
+
 ## 2026-11-14 (after M1 / D1 reports)
 1. **Do not stop between milestones.** The commit and your status file are the report. Continue straight to the next milestone and end your turn only when blocked, when you need a decision, or at M4. Then message the user in at most 5 lines.
 2. **Dismissal tie** (quoted exclusion equals template exclusion): `quote_only`. The database view `v_flag` already does this and is the source for `/flags`. Backend: change `rules` to match and add one unit test.

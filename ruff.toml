@@ -30,4 +30,4 @@ max-statements = 30
 "backend/tests/*" = ["S", "PLR2004"]
 "prompts/*.py" = ["T20"]  # command-line script: printing is its output
 # The generator is full of tuning numbers (shares, day ranges) and uses a seeded, non-cryptographic RNG on purpose.
-"backend/src/integrity/datagen/*" = ["S311", "PLR2004"]
+"backend/src/integrity/datagen/*" = ["S311", "PLR2004", "RUF100"]  # RUF100: an inline noqa for S311 stays harmless

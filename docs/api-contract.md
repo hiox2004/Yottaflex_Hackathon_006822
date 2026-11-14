@@ -1,4 +1,4 @@
-# API contract v1.2 (frozen)
+# API contract v1.3 (frozen)
 
 Owned by the orchestrator tab. Backend implements it, frontend consumes it. Changes only through a status-file request
 ([05-scope-and-workflow.md](plans/05-scope-and-workflow.md) section 5). Scope cuts there apply: no versions, no cursors, no request ids.
@@ -8,7 +8,7 @@ Owned by the orchestrator tab. Backend implements it, frontend consumes it. Chan
   from 0 to 1 with three decimals (`0.623`). IDs are the brief's formats (`CAS-2026-000017`, `EVD-CAS-2026-000017-001`, ...).
 - Actor stub: header `X-Actor-Id: REV-000011` on every request except `GET /health`. Unknown id: 401. Wrong role: 403.
 - Errors: HTTP status plus `{"error": {"code": "CONFLICT_OF_INTEREST", "message": "Plain-language text", "details": {}}}`.
-- Writes return the updated `CaseDetail` (200). Pagination: `limit` (default 50, max 200) and `offset`; lists return `{"items": [...], "total": n}`.
+- Writes return the updated `CaseDetail` (200). Pagination: `limit` (default 50, max 200) and `offset`; lists return `{"items": [...], "total": n}`. `GET /queue` accepts `status` as a comma-separated list (`status=open,under_review`).
 - Every write runs in one transaction and also writes a `case_event`.
 - Assigning a support-staff or administrator account as a case reviewer is refused with 422 `VALIDATION_ERROR` (`details.reasons` contains `ROLE_CANNOT_REVIEW`);
   such accounts appear in `eligible-reviewers` with `eligible: false` and that reason.
@@ -104,9 +104,16 @@ case has reached the stage it checks and none exists, `n/a` before that stage (n
 | No conflict of interest | `REVIEWER_CONFLICT` | a reviewer is assigned |
 | Evidence on record | `EVIDENCE_AFTER_DECISION_NO_HISTORY` | a decision exists |
 | Independent appeal | `APPEAL_CLOSED_NO_INDEPENDENT_REVIEW` | an appeal exists |
-**Provisional (backend proposes final shapes in its status file by M3):** `/audit/metrics` (auditor precision/recall/F1 per issue type,
-triage versus scenario, dataset hash) and `/audit/validation` (counts, per-check pass/fail, distribution tables, dataset hash).
-Until then the frontend uses fixtures for these two.
+**Audit file shapes (final, adopted from the frontend's types):** `dataset_hash` is the manifest hash of the loaded dataset.
+```ts
+type AuditMetrics = { dataset_hash: string;
+  auditor: { issue_type: IssueType; precision: number; recall: number; f1: number; labelled: number }[];
+  triage: { scenario: string; cases: number; flagged: number; dismissed: number }[] };   // triage versus the hidden scenario
+type ValidationSummary = { dataset_hash: string; counts: Record<string, number>;
+  checks: { name: string; passed: boolean; violations: number }[];
+  distributions: { title: string; rows: { label: string; count: number }[] }[] };
+```
+The validator's `summarize(con)` returns `counts`, `checks` and `distributions`; the backend adds `dataset_hash` and serves the file.
 
 ## Example: error
 ```json
