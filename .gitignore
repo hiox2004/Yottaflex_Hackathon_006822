@@ -30,7 +30,9 @@ frontend/dist/
 # ---- Generated data (decision 0009): starter is tracked; full-scale bulk files are regenerated from the seed ----
 /data/full/*
 !/data/full/manifest.json
-!/data/full/VALIDATION.md
+!/data/full/validation_summary.md
+!/data/full/validation.json
+!/data/full/metrics.json
 /data/ground_truth/full/
 /data/tmp/
 /data/_scratch/
