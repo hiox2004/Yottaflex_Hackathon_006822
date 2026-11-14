@@ -49,6 +49,12 @@ def prompts_from(path: Path):
         if not isinstance(c, str) or not c.strip():
             continue
         c = re.sub(r"<system-reminder>.*?</system-reminder>\s*", "", c, flags=re.S).strip()
+        c = re.sub(
+            r"<pasted_content[^>]*>.*?</pasted_content[^>]*>\s*",
+            "[Problem statement text omitted for privacy]\n",
+            c,
+            flags=re.S,
+        ).strip()
         if c:
             yield o.get("timestamp", ""), c
 

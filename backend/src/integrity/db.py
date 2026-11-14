@@ -8,12 +8,15 @@ from psycopg.rows import dict_row, tuple_row
 from integrity.config import get_settings
 
 
-def connect(url: str | None = None, *, dict_rows: bool = False) -> psycopg.Connection[Any]:
+def connect(
+    url: str | None = None, *, dict_rows: bool = False, autocommit: bool = False
+) -> psycopg.Connection[Any]:
     """Open a new connection (UTC session). Short timeout so a missing database fails fast."""
     return psycopg.connect(
         url or get_settings().database_url,
         connect_timeout=3,
         options="-c timezone=UTC",
+        autocommit=autocommit,
         row_factory=dict_row if dict_rows else tuple_row,
     )
 

@@ -1,28 +1,24 @@
 # Architecture
 
+> **Primary Architecture Specification**: Please refer to the complete, reviewed High-Level Design at **[docs/plans/00-hld.md](plans/00-hld.md)** and the Scope & Workflow agreement at **[docs/plans/05-scope-and-workflow.md](plans/05-scope-and-workflow.md)**.
+
+---
+
+## System Overview
+
 ```
 React (Vite)  ──HTTP/JSON──▶  FastAPI  ──SQL──▶  PostgreSQL 16
  frontend/                    backend/src/integrity  docker-compose.yml, database/
-                                 │
-                                 └─ optional, off by default: local LLM "case brief" (read-only, advisory)
 ```
 
-## Backend layers (target)
-`api → services → repositories → db`. Rules are pure functions in `rules/` called by the services. Only `db.py` and the
-repositories contain SQL. Full package map: [backend/README.md](../backend/README.md).
-
-## Where rules are enforced
-See [decision 0004](decisions/0004-where-rules-are-enforced.md). Structure and append-only history are guaranteed by
-the database; business rules are enforced by services and checked independently by the auditor.
-
-## Data flow
-1. The seeded generator (`integrity/datagen`) writes CSV, JSON and SQL seed files to `data/<scale>/` and the ground truth to
-   the separate `data/ground_truth/<scale>/`.
-2. The seed SQL is loaded into PostgreSQL using the same schema (`database/schema.sql`) the application uses.
-3. The validator checks keys, joins, enums, date order, reconciliation and lifecycle transitions.
-4. The auditor, which never reads ground truth, detects the four injected scenarios; its output is scored against
-   ground truth offline to produce precision, recall and F1.
-
-## Determinism
-Fixed seed `20261022`, one RNG stream per purpose, an injected clock (no `now()`), sorted output. Reproducibility is
-proven by regenerating twice and comparing SHA-256 checksums of the exported files (not the database files).
+### Key Principles
+1. **Three-Tier Separation**:
+   - `frontend/`: Single-page app with accessible dialogs, similarity strip, fairness gates, and audit insights. Communicates solely via HTTP/JSON.
+   - `backend/`: FastAPI application enforcing strict validation, `action_checks`, `SELECT ... FOR UPDATE` transactional concurrency, and append-only event logging.
+   - `database/`: PostgreSQL 16 schema with 13 tables, computed `adjusted_score`, views (`v_case_status`, `v_flag`, `v_case_queue`), and append-only triggers.
+2. **Deterministic Domain Core**:
+   - Pure Python business rules in `rules.py` (no I/O, no wall-clock time).
+   - Seeded synthetic datagen (`20261022`) guaranteeing byte-identical reproducibility across platforms and hash seeds (`repro`).
+3. **Decoupled Verification**:
+   - **Validator** (`integrity.validation`): 15 structural checks confirming data integrity; passes with 0 violations even when anomalies are present.
+   - **Auditor** (`integrity.auditor`): Independent due-process auditor detecting exactly the 4 injected anomalies (G1–G4) while ignoring legitimate near-miss decoys.
