@@ -9,16 +9,24 @@ from integrity import db
 from integrity.config import REPO_ROOT
 
 SCHEMA = REPO_ROOT / "database" / "schema.sql"
+RESET = "DROP SCHEMA public CASCADE; CREATE SCHEMA public"
+# Seeded rows carry explicit event ids: move the identity past them (next event = max + 1).
+SYNC_IDENTITY = """
+SELECT setval(pg_get_serial_sequence('case_event', 'case_event_id'),
+              COALESCE(max(case_event_id), 1), max(case_event_id) IS NOT NULL)
+FROM case_event
+"""
 
 
 def load(scale: str | None = None) -> None:
-    """Wipe the public schema, recreate it from schema.sql, then run data/<scale>/seed.sql."""
-    scripts = ["DROP SCHEMA public CASCADE; CREATE SCHEMA public", SCHEMA.read_text("utf-8")]
+    """Wipe the public schema, apply schema.sql, load data/<scale>/seed.sql in one transaction."""
+    scripts = [RESET, SCHEMA.read_text("utf-8")]
     if scale:
         scripts.append((REPO_ROOT / "data" / scale / "seed.sql").read_text("utf-8"))
-    with db.connect() as con:
+    with db.connect() as con:  # commits on success, rolls back on any error
         for script in scripts:
             con.execute(script)  # multi-statement SQL file, so no parameters
+        con.execute(SYNC_IDENTITY)
 
 
 def main() -> None:
